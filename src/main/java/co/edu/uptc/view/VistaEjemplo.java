@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 public class VistaEjemplo extends JFrame implements ActionListener{
 
     VerDocumentos vd;
+    SubirDocumento vistaSubirDocumento;
     public VistaEjemplo() {
         // Cerrar al salir
         System.out.println("Iniciando VistaEjemplo");
@@ -62,8 +63,10 @@ public class VistaEjemplo extends JFrame implements ActionListener{
         JPanel panelOpciones = new JPanel();
         panelOpciones.add(new CajaOpciones(opciones, 500));*/
         //add(new Principal(null, new EditarActividad(null, new String[]{"CAPACITACION", "ASISTENCIA_TECNICA", "DOTACION_EQUIPOS", "SEGUIMIENTO", "SOCIALIZACION"}, "Proyecto de Ejemplo", datosProyecto)), BorderLayout.CENTER);
-        this.vd = new VerDocumentos(this, datos, "nose");
-        add(new Principal(null, vd));
+        //this.vd = new VerDocumentos(this, datos, "nose");
+        //add(new Principal(null, vd));
+        vistaSubirDocumento = new SubirDocumento(this, new String[]{"ACTA","PROPUESTA","INFORMES","SOPORTE_FINANCIERO","MATERIAL_TECNICO"}, "Proyecto de Ejemplo");
+        add(new Principal(this, vistaSubirDocumento));
         // Mostrar la ventana después de agregar los componentes
         setVisible(true);
         setResizable(true);
@@ -73,9 +76,23 @@ public class VistaEjemplo extends JFrame implements ActionListener{
         System.out.println(e.getActionCommand());
         if (e.getActionCommand().contains("DESCARGAR_DOCUMENTO/")) {
             System.out.println(this.vd.seleccionarCarpetaDescarga());
+        } 
+        if (e.getActionCommand().contains("SUBIR_ARCHIVO/")) {
+            String rutaArchivo = vistaSubirDocumento.seleccionarArchivo();
+            if (rutaArchivo != null) {
+                // Obtener solo el nombre del archivo para mostrar
+                String nombreArchivo = new java.io.File(rutaArchivo).getName();
+                vistaSubirDocumento.mostrarArchivoSubido(nombreArchivo);
+                // Guardar rutaArchivo para usarlo después al guardar el documento
+            }
+        }
+        if (e.getActionCommand().startsWith("LIMPIAR_ARCHIVO")) {
+            System.out.println(vistaSubirDocumento.getRutaArchivoSeleccionado());
+        vistaSubirDocumento.limpiarArchivoSeleccionado();
+        vistaSubirDocumento.setRutaArchivoSeleccionado(null);
+        System.out.println(vistaSubirDocumento.getRutaArchivoSeleccionado());
         }
     }
-
     public static void main(String[] args) {
         System.out.println("Iniciando VistaEjemplo");
          new VistaEjemplo();
