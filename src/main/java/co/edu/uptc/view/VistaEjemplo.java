@@ -1,14 +1,17 @@
 package co.edu.uptc.view;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFrame;
 
 
-public class VistaEjemplo extends JFrame {
+public class VistaEjemplo extends JFrame implements ActionListener{
 
+    VerDocumentos vd;
     public VistaEjemplo() {
         // Cerrar al salir
         System.out.println("Iniciando VistaEjemplo");
@@ -46,22 +49,37 @@ public class VistaEjemplo extends JFrame {
         
         // Crear datos de prueba para VerProyecto (solo necesita 4 campos: nombre, fecha inicio, fecha fin, descripción)
         List<String> datosProyecto = new ArrayList<>();
-        datosProyecto.add("Sistema de Gestión ANUC Zetaquira");
+        datosProyecto.add("Capacitacion de istema de Gestión ANUC Zetaquira");
         datosProyecto.add("15-01-2025");
-        datosProyecto.add("30-11-2025");
+        datosProyecto.add("CAPACITACION");
         datosProyecto.add("Este proyecto tiene como objetivo desarrollar un sistema integral para la gestión de proyectos, actividades y documentos de la Asociación Nacional de Usuarios Campesinos (ANUC) en Zetaquira. El sistema permitirá el registro, seguimiento y control de todas las iniciativas comunitarias.");
         
         //add(new Principal(null, new VerTodosProyectos(null, datos)), BorderLayout.CENTER);
-        add(new Principal(null, new CrearProyecto(null)), BorderLayout.CENTER);
+        //add(new Principal(null, new CrearProyecto(null)), BorderLayout.CENTER);
         //add(new Principal(null, new VerProyecto(null, datosProyecto)), BorderLayout.CENTER);
-
+/*
+        String[] opciones = {"Opción 1", "Opción 2", "Opción 3", "Opción 4", "Opción 5", "Opción 6", "Opción 7", "Opción 8", "Opción 9", "Opción 10"};
+        JPanel panelOpciones = new JPanel();
+        panelOpciones.add(new CajaOpciones(opciones, 500));*/
+        //add(new Principal(null, new EditarActividad(null, new String[]{"CAPACITACION", "ASISTENCIA_TECNICA", "DOTACION_EQUIPOS", "SEGUIMIENTO", "SOCIALIZACION"}, "Proyecto de Ejemplo", datosProyecto)), BorderLayout.CENTER);
+        this.vd = new VerDocumentos(this, datos, "nose");
+        add(new Principal(null, vd));
         // Mostrar la ventana después de agregar los componentes
         setVisible(true);
         setResizable(true);
+    }
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        System.out.println(e.getActionCommand());
+        if (e.getActionCommand().contains("DESCARGAR_DOCUMENTO/")) {
+            System.out.println(this.vd.seleccionarCarpetaDescarga());
+        }
     }
 
     public static void main(String[] args) {
         System.out.println("Iniciando VistaEjemplo");
          new VistaEjemplo();
     }
+
+    
 }

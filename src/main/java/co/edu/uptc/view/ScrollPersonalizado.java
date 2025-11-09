@@ -53,6 +53,8 @@ public class ScrollPersonalizado extends JScrollPane {
         setPreferredSize(new Dimension(ancho, alto));
         if (mostrarBordeVerde) {
             setBorder(BorderFactory.createLineBorder(color.getVerdeOscuro()));
+        } else {
+            setBorder(BorderFactory.createEmptyBorder());
         }
         getViewport().setBackground(color.getBeige());
     }

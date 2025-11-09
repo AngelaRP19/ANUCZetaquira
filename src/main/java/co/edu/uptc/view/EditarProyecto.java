@@ -21,7 +21,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class VerProyecto extends JPanel{
+public class EditarProyecto extends JPanel{
     
     private  ActionListener listener;  
     private Texto titulo; //subtitulo
@@ -45,7 +45,7 @@ public class VerProyecto extends JPanel{
     private List<String> datos;
     private final ColorConstante color = new ColorConstante();
 
-    public VerProyecto(ActionListener listener, List<String> datos){
+    public EditarProyecto(ActionListener listener, List<String> datos){
         this.listener = listener;
         this.datos = datos;
         setLayout(new BorderLayout());
