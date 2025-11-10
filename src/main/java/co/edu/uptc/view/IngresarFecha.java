@@ -16,10 +16,11 @@ import java.util.Calendar;
 import java.util.Date;
 
 import javax.swing.ImageIcon;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import com.toedter.calendar.JCalendar;
 
@@ -28,10 +29,10 @@ public class IngresarFecha extends JPanel {
     private JTextField campoTexto;
     private JLabel iconoCalendario;
     private Font fuente;
-    private JPopupMenu popupCalendario;
+    private JDialog dialogoCalendario;
     private JCalendar calendario;
     private SimpleDateFormat formatoFecha;
-    private boolean seleccionada = false; // true solo cuando el usuario elige explícitamente una fecha
+    private boolean seleccionada = false; 
     
     public IngresarFecha(int ancho) {
         setLayout(new BorderLayout());
@@ -94,11 +95,9 @@ public class IngresarFecha extends JPanel {
         panelIcono.setOpaque(false);
         panelIcono.add(iconoCalendario);
         
-        // Popup con el calendario
-        popupCalendario = new JPopupMenu();
+        // Dialogo con el calendario
         calendario = new JCalendar();
         calendario.setPreferredSize(new Dimension(300, 200));
-        popupCalendario.add(calendario);
         
         // Agregar componentes
         add(campoTexto, BorderLayout.CENTER);
@@ -125,7 +124,7 @@ public class IngresarFecha extends JPanel {
                 mostrarCalendario();
             }
         });
-        
+
         // Click en el icono
         iconoCalendario.addMouseListener(new MouseAdapter() {
             @Override
@@ -133,18 +132,33 @@ public class IngresarFecha extends JPanel {
                 mostrarCalendario();
             }
         });
-        
-        // Listener para cuando se selecciona una fecha
-        calendario.addPropertyChangeListener("calendar", evt -> {
+
+        // Listener para cuando se selecciona un día (no solo cambio de mes/año)
+        calendario.getDayChooser().addPropertyChangeListener("day", evt -> {
+            // Solo cerrar el dialogo si el usuario selecciona un día
             Calendar fechaSeleccionada = calendario.getCalendar();
             campoTexto.setText(formatoFecha.format(fechaSeleccionada.getTime()));
             seleccionada = true;
-            popupCalendario.setVisible(false);
+            if (dialogoCalendario != null) {
+                dialogoCalendario.dispose();
+            }
         });
     }
     
     private void mostrarCalendario() {
-        popupCalendario.show(campoTexto, 0, campoTexto.getHeight());
+        if (dialogoCalendario == null || !dialogoCalendario.isVisible()) {
+            dialogoCalendario = new JDialog(SwingUtilities.getWindowAncestor(this));
+            dialogoCalendario.setUndecorated(true);
+            dialogoCalendario.setModal(false);
+            dialogoCalendario.add(calendario);
+            dialogoCalendario.pack();
+            
+            // Posicionar el dialogo debajo del campo de texto
+            java.awt.Point ubicacion = campoTexto.getLocationOnScreen();
+            dialogoCalendario.setLocation(ubicacion.x, ubicacion.y + campoTexto.getHeight());
+            
+            dialogoCalendario.setVisible(true);
+        }
     }
     
     public String getFecha() {

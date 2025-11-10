@@ -139,8 +139,24 @@ public class ActividadDAO {
                 String descripcion = rs.getString("descripcion");
                 TipoActividad tipo = TipoActividad.valueOf(rs.getString("tipo"));
                 
+                // Corregido: Las fechas se guardan como timestamps, no como strings yyyy-MM-dd
                 String fechaStr = rs.getString("fecha");
-                Date fecha = (fechaStr != null) ? Date.valueOf(fechaStr) : null;
+                Date fecha = null;
+                if (fechaStr != null && !fechaStr.trim().isEmpty()) {
+                    try {
+                        // Intentar parsear como timestamp (milisegundos)
+                        long timestamp = Long.parseLong(fechaStr.trim());
+                        fecha = new Date(timestamp);
+                    } catch (NumberFormatException e) {
+                        // Si no es timestamp, intentar como string en formato yyyy-MM-dd
+                        try {
+                            fecha = Date.valueOf(fechaStr.trim());
+                        } catch (IllegalArgumentException ex) {
+                            System.err.println("Error parseando fecha '" + fechaStr + "': " + ex.getMessage());
+                            fecha = null;
+                        }
+                    }
+                }
 
 
                 actividades.add(new Actividad(nombre, descripcion, tipo, fecha));
