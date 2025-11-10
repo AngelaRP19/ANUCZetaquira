@@ -127,30 +127,30 @@ public class ActividadDAO {
     }
 
     public List<Actividad> obtenerActividadesPorProyecto(int proyectoId) {
-    List<Actividad> actividades = new ArrayList<>();
-    String sql = "SELECT nombre, descripcion, tipo, fecha FROM actividades WHERE proyecto_id = ?";
+        List<Actividad> actividades = new ArrayList<>();
+        String sql = "SELECT nombre, descripcion, tipo, fecha FROM actividades WHERE proyecto_id = ?";
 
-    try (PreparedStatement stmt = Conexion.getConnection().prepareStatement(sql)) {
-        stmt.setInt(1, proyectoId);
-        ResultSet rs = stmt.executeQuery();
+        try (PreparedStatement stmt = Conexion.getConnection().prepareStatement(sql)) {
+            stmt.setInt(1, proyectoId);
+            ResultSet rs = stmt.executeQuery();
 
-        while (rs.next()) {
-            String nombre = rs.getString("nombre");
-            String descripcion = rs.getString("descripcion");
-            TipoActividad tipo = TipoActividad.valueOf(rs.getString("tipo"));
-            
-            String fechaStr = rs.getString("fecha");
-            Date fecha = (fechaStr != null) ? Date.valueOf(fechaStr) : null;
+            while (rs.next()) {
+                String nombre = rs.getString("nombre");
+                String descripcion = rs.getString("descripcion");
+                TipoActividad tipo = TipoActividad.valueOf(rs.getString("tipo"));
+                
+                String fechaStr = rs.getString("fecha");
+                Date fecha = (fechaStr != null) ? Date.valueOf(fechaStr) : null;
 
 
-            actividades.add(new Actividad(nombre, descripcion, tipo, fecha));
+                actividades.add(new Actividad(nombre, descripcion, tipo, fecha));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-
-    return actividades;
+        return actividades;
 }
 
 }

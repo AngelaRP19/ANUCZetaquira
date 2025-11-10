@@ -23,6 +23,7 @@ public class CrearProyecto extends JPanel{
     private IngresarFecha campoFechaInicio;
     private IngresarFecha campoFechaFin;
     private AreaTexto descripcion;
+    private CajaOpciones estado;
 
     private Boton crearProyecto;
     private Boton cancelar;
@@ -54,11 +55,12 @@ public class CrearProyecto extends JPanel{
         this.instruccion = new Texto("  Por favor, llene los campos obligatorios *", TipoTexto.INSTRUCCION, "VERDE");
     }
     private void camposFormulario(){
-        this.campoNombre = new IngresarCampo(13);
-        this.campoFechaInicio = new IngresarFecha(331);
-        this.campoFechaFin = new IngresarFecha(331);
+        this.campoNombre = new IngresarCampo(14);
+        this.campoFechaInicio = new IngresarFecha(340);
+        this.campoFechaFin = new IngresarFecha(340);
         this.descripcion = new AreaTexto(5, 22);
         this.descripcion.setPreferredSize(new Dimension(400, 120));
+        this.estado = new CajaOpciones(new String[]{"ACTIVO", "FINALIZADO", "SUSPENDIDO"}, 300);
     }
     private void botones(){
         this.crearProyecto = new Boton("Guardar", 160, 40, "GUARDAR_PROYECTO", 15, color.getVerdeClaro());
@@ -86,7 +88,7 @@ public class CrearProyecto extends JPanel{
         cabecera.setBackground(color.getBeige());
         cabecera.add(titulo);
         cabecera.add(Box.createVerticalStrut(5)); 
-        cabecera.add(crearSubPanel(subtitulo));
+        //cabecera.add(crearSubPanel(subtitulo));
         cabecera.add(crearSubPanel(instruccion));
 
         add(cabecera, BorderLayout.NORTH);
@@ -113,7 +115,6 @@ public class CrearProyecto extends JPanel{
 
         panelCentral.add(this.panelIzquierdo());
         panelCentral.add(Box.createHorizontalStrut(20));
-        // Panel derecho extraído a método dedicado
         panelCentral.add(this.panelDerecho());
         add(panelCentral, BorderLayout.CENTER);
 
@@ -122,9 +123,11 @@ public class CrearProyecto extends JPanel{
         JPanel panelDerecho = new JPanel();
         panelDerecho.setLayout(new BoxLayout(panelDerecho, BoxLayout.Y_AXIS));
         panelDerecho.setBackground(color.getBeige());
+        panelDerecho.setAlignmentY(CENTER_ALIGNMENT);
+        panelDerecho.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 150));
 
         Texto lblDocs = new Texto("Documentos", TipoTexto.NORMAL, "VERDE");
-        lblDocs.setAlignmentX(LEFT_ALIGNMENT);
+        lblDocs.setAlignmentX(CENTER_ALIGNMENT);
         panelDerecho.add(lblDocs);
         panelDerecho.add(Box.createVerticalStrut(8));
         panelDerecho.add(crearSubPanel(subirDocumento));
@@ -133,7 +136,7 @@ public class CrearProyecto extends JPanel{
         panelDerecho.add(Box.createVerticalStrut(16));
 
         Texto lblActs = new Texto("Actividades", TipoTexto.NORMAL, "VERDE");
-        lblActs.setAlignmentX(LEFT_ALIGNMENT);
+        lblActs.setAlignmentX(CENTER_ALIGNMENT);
         panelDerecho.add(lblActs);
         panelDerecho.add(Box.createVerticalStrut(8));
         panelDerecho.add(crearSubPanel(registrarActividad));
@@ -143,10 +146,10 @@ public class CrearProyecto extends JPanel{
     }
 
     private JPanel crearSubPanel(JComponent comp) {
-        JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
         p.setBackground(color.getBeige());
         p.add(comp);
-        p.setAlignmentX(LEFT_ALIGNMENT);
+        p.setAlignmentX(CENTER_ALIGNMENT);
         return p;
     }
 
@@ -164,6 +167,9 @@ public class CrearProyecto extends JPanel{
 
         JPanel pFechaFin = crearFila(new Texto(   "* Fecha de Finalización:    ", TipoTexto.NORMAL, "VERDE"), campoFechaFin);
         panelIzquierdo.add(pFechaFin);
+
+        JPanel pEstado = crearFila(new Texto(      "* Estado:                          ", TipoTexto.NORMAL, "VERDE"), estado);
+        panelIzquierdo.add(pEstado);
 
         JPanel pDescripcion = crearFila(new Texto("* Descripción:    ", TipoTexto.NORMAL, "VERDE"), descripcion);
         panelIzquierdo.add(pDescripcion);
@@ -189,6 +195,9 @@ public class CrearProyecto extends JPanel{
     }
     public Date getFechaFin() {
         return campoFechaFin.getFechaCalendar();
+    }
+    public String getEstado() {
+        return (String) estado.getSelectedItem();
     }
     public String getDescripcion() {
         return descripcion.getText();
