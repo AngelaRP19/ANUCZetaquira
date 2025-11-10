@@ -56,7 +56,7 @@ public class VistaEjemplo extends JFrame implements ActionListener{
         datosProyecto.add("Este proyecto tiene como objetivo desarrollar un sistema integral para la gestión de proyectos, actividades y documentos de la Asociación Nacional de Usuarios Campesinos (ANUC) en Zetaquira. El sistema permitirá el registro, seguimiento y control de todas las iniciativas comunitarias.");
         
         //add(new Principal(null, new VerTodosProyectos(null, datos)), BorderLayout.CENTER);
-        //add(new Principal(null, new CrearProyecto(null)), BorderLayout.CENTER);
+        add(new Principal(null, new CrearProyecto(null)), BorderLayout.CENTER);
         //add(new Principal(null, new VerProyecto(null, datosProyecto)), BorderLayout.CENTER);
 /*
         String[] opciones = {"Opción 1", "Opción 2", "Opción 3", "Opción 4", "Opción 5", "Opción 6", "Opción 7", "Opción 8", "Opción 9", "Opción 10"};
@@ -66,7 +66,7 @@ public class VistaEjemplo extends JFrame implements ActionListener{
         //this.vd = new VerDocumentos(this, datos, "nose");
         //add(new Principal(null, vd));
         vistaSubirDocumento = new SubirDocumento(this, new String[]{"ACTA","PROPUESTA","INFORMES","SOPORTE_FINANCIERO","MATERIAL_TECNICO"}, "Proyecto de Ejemplo");
-        add(new Principal(this, vistaSubirDocumento));
+        //add(new Principal(this, vistaSubirDocumento));
         // Mostrar la ventana después de agregar los componentes
         setVisible(true);
         setResizable(true);

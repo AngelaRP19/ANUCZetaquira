@@ -31,6 +31,7 @@ public class IngresarFecha extends JPanel {
     private JPopupMenu popupCalendario;
     private JCalendar calendario;
     private SimpleDateFormat formatoFecha;
+    private boolean seleccionada = false; // true solo cuando el usuario elige explícitamente una fecha
     
     public IngresarFecha(int ancho) {
         setLayout(new BorderLayout());
@@ -137,6 +138,7 @@ public class IngresarFecha extends JPanel {
         calendario.addPropertyChangeListener("calendar", evt -> {
             Calendar fechaSeleccionada = calendario.getCalendar();
             campoTexto.setText(formatoFecha.format(fechaSeleccionada.getTime()));
+            seleccionada = true;
             popupCalendario.setVisible(false);
         });
     }
@@ -146,16 +148,17 @@ public class IngresarFecha extends JPanel {
     }
     
     public String getFecha() {
-        return campoTexto.getText();
+        return seleccionada ? campoTexto.getText() : "";
     }
     
     public Date getFechaCalendar() {
-        return calendario.getCalendar().getTime();
+        return seleccionada ? calendario.getCalendar().getTime() : null;
     }
     
     public void setFecha(Calendar fecha) {
         calendario.setCalendar(fecha);
         campoTexto.setText(formatoFecha.format(fecha.getTime()));
+        seleccionada = true;
     }
     
     public void setPlaceholder(String texto) {

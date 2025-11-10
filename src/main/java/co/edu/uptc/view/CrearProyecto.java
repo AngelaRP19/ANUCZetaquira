@@ -50,7 +50,7 @@ public class CrearProyecto extends JPanel{
         this.botones();
     }
     private void encabezados(){
-        this.titulo = new Texto("Registrar Nuevo Proyecto", TipoTexto.TITULO, "VERDE");
+        this.titulo = new Texto("Crear Proyecto", TipoTexto.TITULO, "VERDE");
         this.subtitulo = new Texto("  DATOS DEL PROYECTO", TipoTexto.NORMAL, "VERDE");
         this.instruccion = new Texto("  Por favor, llene los campos obligatorios *", TipoTexto.INSTRUCCION, "VERDE");
     }
@@ -165,7 +165,7 @@ public class CrearProyecto extends JPanel{
         JPanel pFechaInicio = crearFila(new Texto("* Fecha de Inicio:              ", TipoTexto.NORMAL, "VERDE"), campoFechaInicio);
         panelIzquierdo.add(pFechaInicio);
 
-        JPanel pFechaFin = crearFila(new Texto(   "* Fecha de Finalización:    ", TipoTexto.NORMAL, "VERDE"), campoFechaFin);
+        JPanel pFechaFin = crearFila(new Texto(   "  Fecha de Finalización:    ", TipoTexto.NORMAL, "VERDE"), campoFechaFin);
         panelIzquierdo.add(pFechaFin);
 
         JPanel pEstado = crearFila(new Texto(      "* Estado:                          ", TipoTexto.NORMAL, "VERDE"), estado);

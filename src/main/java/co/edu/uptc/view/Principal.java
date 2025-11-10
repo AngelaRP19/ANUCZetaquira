@@ -47,7 +47,7 @@ public class Principal extends JPanel{
 
     private void inicializarComponentes() {
         this.color = new ColorConstante();
-        this.registrarProyecto = new Boton("Registrar Proyecto", 300, 50, "REGISTRAR_PROYECTO", 15, color.getVerdeOpciones());
+        this.registrarProyecto = new Boton("Crear Proyecto", 300, 50, "CREAR_PROYECTO", 15, color.getVerdeOpciones());
         this.verProyectos = new Boton("Ver Proyectos", 300, 50, "VER_PROYECTOS", 15, color.getVerdeOpciones());
         this.manualUsuario = new Boton("Manual de Usuario", 300, 50, "MANUAL_USUARIO", 15, color.getVerdeOscuro());
         this.botonCerrar();
