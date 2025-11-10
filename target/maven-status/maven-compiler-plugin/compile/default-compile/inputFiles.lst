@@ -1,29 +1,39 @@
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\dao\ActividadDAO.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\dao\DocumentoDAO.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\dao\ProyectoDAO.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\database\Conexion.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\Main.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\model\Actividad.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\model\Documento.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\model\EstadoProyecto.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\model\Gestor.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\model\Proyecto.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\model\TipoActividad.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\model\TipoDocumento.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\model\Usuario.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\presenter\Main.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\presenter\Presenter.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\view\AreaTexto.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\view\Bienvenida.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\view\Boton.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\view\ColorConstante.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\view\CrearProyecto.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\view\IngresarCampo.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\view\IngresarFecha.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\view\Principal.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\view\Texto.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\view\TextPrompt.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\view\TipoTexto.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\view\VerProyecto.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\view\VistaConCalendario.java
-C:\Users\angel\Documents\UPTC\2025-2\Ing Software I\PROYECTO ANUC\anuczetaquira\src\main\java\co\edu\uptc\view\VistaEjemplo.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/Main.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/dao/ActividadDAO.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/dao/DocumentoDAO.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/dao/ProyectoDAO.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/database/Conexion.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/model/Actividad.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/model/Documento.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/model/EstadoProyecto.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/model/Gestor.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/model/Proyecto.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/model/TipoActividad.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/model/TipoDocumento.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/model/Usuario.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/presenter/Main.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/presenter/Presenter.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/AreaTexto.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/Bienvenida.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/Boton.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/CajaOpciones.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/ColorConstante.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/CrearActividad.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/CrearProyecto.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/DialogoPersonalizado.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/EditarActividad.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/EditarProyecto.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/IngresarCampo.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/IngresarFecha.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/PanelRedondeado.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/Principal.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/ScrollPersonalizado.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/SubirDocumento.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/TextPrompt.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/Texto.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/TipoTexto.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/VerActividades.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/VerDocumentos.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/VerProyectos.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/VistaEjemplo.java
+/Users/davidrodriguez/Desktop/AnucProyecto/ANUCZetaquira/src/main/java/co/edu/uptc/view/VistaGestor.java
