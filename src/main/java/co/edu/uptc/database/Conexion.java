@@ -11,6 +11,11 @@ public class Conexion {
     private Conexion() {}
 
     public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(DB_URL);
+        try {
+            Class.forName("org.sqlite.JDBC");
+            return DriverManager.getConnection(DB_URL);
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("SQLite driver not found", e);
+        }
     }
 }

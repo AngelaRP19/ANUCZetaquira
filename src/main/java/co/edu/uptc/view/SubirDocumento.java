@@ -253,6 +253,24 @@ public class SubirDocumento extends JPanel{
     public void setRutaArchivoSeleccionado(String rutaArchivoSeleccionado) {
         this.rutaArchivoSeleccionado = rutaArchivoSeleccionado;
     }
+    
+    public void setRutaArchivoSeleccionado(String rutaArchivo, String nombreArchivo) {
+        this.rutaArchivoSeleccionado = rutaArchivo;
+        
+        // Actualizar la UI para mostrar el archivo seleccionado
+        if (rutaArchivo != null && !rutaArchivo.isEmpty()) {
+            labelArchivoSubido.setText("📎 Archivo seleccionado: " + nombreArchivo);
+            panelArchivoSubido.setVisible(true);
+            System.out.println("[LOG] SubirDocumento.setRutaArchivoSeleccionado() - Archivo configurado: " + nombreArchivo);
+        } else {
+            labelArchivoSubido.setText("📎 No hay archivo seleccionado");
+            panelArchivoSubido.setVisible(false);
+        }
+        
+        // Refrescar el panel
+        revalidate();
+        repaint();
+    }
 
     
 

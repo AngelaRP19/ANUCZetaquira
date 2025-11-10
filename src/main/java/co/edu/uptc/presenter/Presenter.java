@@ -4,10 +4,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Date;
 import java.util.List;
+import java.text.SimpleDateFormat;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.io.File;
 
 import javax.swing.JFrame;
 
 import co.edu.uptc.model.Proyecto;
+import co.edu.uptc.model.Actividad;
 import co.edu.uptc.model.Gestor;
 import co.edu.uptc.view.VistaGestor;
 
@@ -15,11 +20,17 @@ public class Presenter implements ActionListener{
 
     private Gestor gestorProyecto;
     private VistaGestor vista;
+    
+    // Estado actual de navegación
+    private String proyectoActual;
+    private String actividadActual;
 
     public Presenter() {
         this.gestorProyecto = new Gestor();
-        this.gestorProyecto.cargarTodoDesdeBD();
+        // NO cargar todo de una vez - cargar bajo demanda
         this.vista = new VistaGestor(this);
+        this.proyectoActual = null;
+        this.actividadActual = null;
     }
 
     public void cargarTodoDesdeBD() {
@@ -55,33 +66,204 @@ public class Presenter implements ActionListener{
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        switch (e.getActionCommand().toUpperCase()) {
-            case "MINIMIZAR":
-                vista.setExtendedState(JFrame.ICONIFIED);
-                break;
-            case "CERRAR":
-                System.exit(0); 
-                break;
-            case "CREAR_PROYECTO":
-                this.crearProyecto();
-                break;
-            case "VER_PROYECTOS":
-                this.verProyectos();
-                break;
-            case "MANUAL_USUARIO":
-                vista.descargarManualUsuario();
-                break;
-            case "GUARDAR_PROYECTO":
-                this.guardarProyecto();
-                break;
-            case "VOLVER_BIENVENIDA":
-                vista.bienvenida();
-                break;
-            default:
-                throw new AssertionError();
-        }    
+        String comando = e.getActionCommand();
+        System.out.println("[LOG] Presenter.actionPerformed() - Comando recibido: " + comando);
+        
+        // Menú Principal
+        if (comando.equals("MINIMIZAR")) {
+            System.out.println("[LOG] Presenter - Minimizando ventana");
+            vista.setExtendedState(JFrame.ICONIFIED);
+        } 
+        else if (comando.equals("CERRAR")) {
+            System.out.println("[LOG] Presenter - Cerrando aplicación");
+            System.exit(0);
+        } 
+        else if (comando.equals("CREAR_PROYECTO")) {
+            System.out.println("[LOG] Presenter - Ir a crear proyecto");
+            crearProyecto();
+        } 
+        else if (comando.equals("VER_PROYECTOS")) {
+            System.out.println("[LOG] Presenter - Ir a ver proyectos");
+            verProyectos();
+        } 
+        else if (comando.equals("MANUAL_USUARIO")) {
+            System.out.println("[LOG] Presenter - Descargar manual de usuario");
+            vista.descargarManualUsuario();
+        } 
+        else if (comando.equals("VOLVER_BIENVENIDA")) {
+            System.out.println("[LOG] Presenter - Volver a bienvenida");
+            vista.bienvenida();
+        }
+        
+        // Ver Proyecto (desde lista)
+        else if (comando.startsWith("VER_PROYECTO/")) {
+            String nombre = comando.substring("VER_PROYECTO/".length());
+            verProyecto(nombre);
+        }
+        
+        // Guardar Proyecto (crear o editar)
+        else if (comando.equals("GUARDAR_PROYECTO") || comando.equals("CREAR_PROYECTO")) {
+            guardarProyecto();
+        }
+        
+        // Editar Proyecto
+        else if (comando.equals("GUARDAR_CAMBIOS")) {
+            guardarProyecto();
+        }
+        else if (comando.equals("GUARDAR_ACTIVIDAD")) {
+            guardarActividad();
+        }
+        else if (comando.equals("ELIMINAR_PROYECTO")) {
+            eliminarProyecto();
+        }
+        else if (comando.startsWith("ELIMINAR_PROYECTO")) {
+            String nombre = comando.substring("ELIMINAR_PROYECTO".length());
+            if (!nombre.isEmpty()) {
+                proyectoActual = nombre;
+                eliminarProyecto();
+            }
+        }
+        
+        // Cancelar (volver atrás)
+        else if (comando.equals("CANCELAR")) {
+            cancelar();
+        }
+        
+        // Actividades
+        else if (comando.equals("REGISTRAR_ACTIVIDAD")) {
+            crearActividad();
+        }
+        else if (comando.equals("VER_ACTIVIDADES")) {
+            verActividades();
+        }
+        else if (comando.startsWith("VER_ACTIVIDAD/")) {
+            String nombre = comando.substring("VER_ACTIVIDAD/".length());
+            verActividad(nombre);
+        }
+        else if (comando.equals("CREAR_ACTIVIDAD")) {
+            guardarActividad();
+        }
+        else if (comando.equals("EDITAR_ACTIVIDAD")) {
+            guardarCambiosActividad();
+        }
+        else if (comando.startsWith("ELIMINAR_ACTIVIDAD/")) {
+            String nombre = comando.substring("ELIMINAR_ACTIVIDAD/".length());
+            eliminarActividad(nombre);
+        }
+        else if (comando.startsWith("EDITAR_ACTIVIDAD")) {
+            // Comando para editar actividad (puede venir con formato EDITAR_ACTIVIDADHola)
+            if (comando.equals("EDITAR_ACTIVIDAD")) {
+                guardarCambiosActividad();
+            } else if (comando.startsWith("EDITAR_ACTIVIDAD")) {
+                // Extraer el nombre del proyecto si viene concatenado
+                String resto = comando.substring("EDITAR_ACTIVIDAD".length());
+                if (!resto.isEmpty()) {
+                    guardarCambiosActividad();
+                }
+            }
+        }
+        else if (comando.startsWith("VOLVER_VER_ACTIVIDADES")) {
+            verActividades();
+        }
+        
+        // Documentos
+        else if (comando.equals("PANEL_SUBIR_DOCUMENTO")) {
+            subirDocumento();
+        }
+        else if (comando.equals("VER_DOCUMENTOS")) {
+            verDocumentos();
+        }
+        else if (comando.startsWith("DESCARGAR_DOCUMENTO/")) {
+            String[] partes = comando.substring("DESCARGAR_DOCUMENTO/".length()).split("/");
+            if (partes.length >= 2) {
+                descargarDocumento(partes[0], partes[1]);
+            }
+        }
+        else if (comando.startsWith("ELIMINAR_DOCUMENTO/")) {
+            String[] partes = comando.substring("ELIMINAR_DOCUMENTO/".length()).split("/");
+            if (partes.length >= 2) {
+                eliminarDocumento(partes[0], partes[1]);
+            }
+        }
+        else if (comando.equals("GUARDAR_DOCUMENTO")) {
+            guardarDocumento();
+        }
+        else if (comando.startsWith("GUARDAR_DOCUMENTO/")) {
+            String nombre = comando.substring("GUARDAR_DOCUMENTO/".length());
+            if (!nombre.isEmpty()) {
+                guardarDocumento();
+            }
+        }
+        else if (comando.startsWith("SUBIR_ARCHIVO/")) {
+            seleccionarArchivo();
+        }
+        else if (comando.startsWith("LIMPIAR_ARCHIVO")) {
+            // Manejado por la vista
+        }
+        
+        // Comandos adicionales que faltaban
+        else if (comando.startsWith("EDITAR_PROYECTO")) {
+            String nombre = comando.substring("EDITAR_PROYECTO".length());
+            if (!nombre.isEmpty()) {
+                verProyecto(nombre);
+            }
+        }
+        else if (comando.startsWith("VOLVER_VER_PROYECTOS")) {
+            verProyectos();
+        }
+        else if (comando.startsWith("PANEL_VER_ACTIVIDADES")) {
+            String nombre = comando.substring("PANEL_VER_ACTIVIDADES".length());
+            if (!nombre.isEmpty()) {
+                proyectoActual = nombre;
+                verActividades();
+            }
+        }
+        else if (comando.startsWith("PANEL_VER_DOCUMENTOS")) {
+            if (comando.contains("/")) {
+                String nombre = comando.substring(comando.indexOf("/") + 1);
+                if (!nombre.isEmpty()) {
+                    proyectoActual = nombre;
+                    verDocumentos();
+                }
+            } else {
+                verDocumentos();
+            }
+        }
+        else if (comando.equals("PANEL_SUBIR_DOCUMENTO")) {
+            if (proyectoActual != null) {
+                subirDocumento();
+            }
+        }
+        else if (comando.equals("BUSCAR_PROYECTO")) {
+            buscarProyectos();
+        }
+        else if (comando.equals("BUSCAR_ACTIVIDAD")) {
+            buscarActividades();
+        }
+        else if (comando.equals("BUSCAR_DOCUMENTO")) {
+            buscarDocumentos();
+        }
+        else if (comando.startsWith("VOLVER_PROYECTO")) {
+            String nombre = comando.substring("VOLVER_PROYECTO/".length());
+            if (!nombre.isEmpty()) {
+                proyectoActual = nombre;
+                verProyecto(nombre);
+            }
+        }
+        else if (comando.equals("PANEL_REGISTRAR_ACTIVIDAD")) {
+            if (proyectoActual != null) {
+                crearActividad();
+            } else {
+                System.out.println("[LOG] Presenter - ERROR: No hay proyecto seleccionado para registrar actividad");
+                vista.showErrorMessage("Debe seleccionar un proyecto primero");
+            }
+        }
+        else {
+            System.out.println("[LOG] Presenter - Comando no reconocido: " + comando);
+        }
     }
     private void guardarProyecto() {
+        System.out.println("[LOG] Presenter.guardarProyecto() - Iniciando");
         // 1) Leer valores desde la vista y sanear entradas de texto
         String nombreRaw = vista.getNombreProyecto();
         String nombre = (nombreRaw != null) ? nombreRaw.trim() : null;
@@ -95,50 +277,653 @@ public class Presenter implements ActionListener{
         String estadoRaw = vista.getEstadoProyecto();
         String estado = (estadoRaw != null) ? estadoRaw.trim() : null;
 
+        System.out.println("[LOG] Presenter.guardarProyecto() - Datos leídos: nombre=" + nombre);
+        System.out.println("[LOG] Presenter.guardarProyecto() - Fechas: inicio=" + fechaInicio + ", fin=" + fechaFin);
+        System.out.println("[LOG] Presenter.guardarProyecto() - Estado: " + estado + ", Descripción: " + descripcion);
+
         // 2) Validaciones de obligatorios: nombre, ambas fechas, descripcion y estado
         if (nombre == null || nombre.isEmpty()) {
+            System.out.println("[LOG] Presenter.guardarProyecto() - ERROR: Nombre vacío");
             vista.showErrorMessage("El nombre del proyecto es obligatorio.");
             return;
         }
         if (fechaInicio == null ) {
+            System.out.println("[LOG] Presenter.guardarProyecto() - ERROR: Fecha inicio vacía");
             vista.showErrorMessage("Debe ingresar la fecha de inicio y del proyecto.");
             return;
         }
         if (descripcion == null || descripcion.isEmpty()) {
+            System.out.println("[LOG] Presenter.guardarProyecto() - ERROR: Descripción vacía");
             vista.showErrorMessage("La descripción del proyecto es obligatoria.");
             return;
         }
         if (estado == null || estado.isEmpty()) {
+            System.out.println("[LOG] Presenter.guardarProyecto() - ERROR: Estado vacío");
             vista.showErrorMessage("El estado del proyecto es obligatorio.");
             return;
         }
 
         // 3) Validación de consistencia de fechas
-        if (fechaFin.before(fechaInicio)) {
+        if (fechaFin != null && fechaFin.before(fechaInicio)) {
+            System.out.println("[LOG] Presenter.guardarProyecto() - ERROR: Fechas inconsistentes");
             vista.showErrorMessage("La fecha de finalización no puede ser anterior a la fecha de inicio.");
             return;
         }
 
         // 4) Validación de unicidad del nombre (ya saneado)
         if (gestorProyecto.proyectoExiste(nombre)) {
+            System.out.println("[LOG] Presenter.guardarProyecto() - ERROR: Proyecto ya existe");
             vista.showErrorMessage("El nombre del proyecto ya existe. Por favor, ingrese otro nombre.");
             return;
         }
 
         // 5) Persistencia
+        System.out.println("[LOG] Presenter.guardarProyecto() - Guardando proyecto en BD");
         if (gestorProyecto.agregarProyecto(nombre, fechaInicio, fechaFin, estado, descripcion)) {
+            System.out.println("[LOG] Presenter.guardarProyecto() - Proyecto guardado exitosamente");
             vista.showMessage("Proyecto creado exitosamente.");
             vista.bienvenida();
         } else {
+            System.out.println("[LOG] Presenter.guardarProyecto() - ERROR: No se pudo guardar");
             vista.showErrorMessage("No se pudo crear el proyecto. Por favor, intente de nuevo.");
         }
     }
 
-    private void crearProyecto() {
+    public void crearProyecto() {
+        System.out.println("[LOG] Presenter.crearProyecto() - Iniciando");
         vista.crearProyecto();
+        System.out.println("[LOG] Presenter.crearProyecto() - Completado");
     }
+    
     private void verProyectos() {
+        System.out.println("[LOG] Presenter.verProyectos() - Iniciando");
+        // Cargar proyectos bajo demanda (solo cuando el usuario los pide)
+        gestorProyecto.cargarTodoDesdeBD();
         List<String> nombresProyectos = gestorProyecto.getNombresProyectos();
+        System.out.println("[LOG] Presenter.verProyectos() - Encontrados " + nombresProyectos.size() + " proyectos");
         vista.verProyectos(nombresProyectos);
+        System.out.println("[LOG] Presenter.verProyectos() - Completado");
+    }
+    
+    private void verProyecto(String nombreProyecto) {
+        System.out.println("[LOG] Presenter.verProyecto() - Buscando proyecto: " + nombreProyecto);
+        this.proyectoActual = nombreProyecto;
+        Proyecto proyecto = gestorProyecto.buscarProyectoPorNombre(nombreProyecto);
+        
+        if (proyecto == null) {
+            System.out.println("[LOG] Presenter.verProyecto() - ERROR: Proyecto no encontrado");
+            vista.showErrorMessage("Proyecto no encontrado: " + nombreProyecto);
+            return;
+        }
+        
+        System.out.println("[LOG] Presenter.verProyecto() - Proyecto encontrado: " + proyecto.getNombre());
+        // Preparar datos del proyecto para la vista (formato dd-MM-yyyy como en actividades)
+        List<String> datosProyecto = new java.util.ArrayList<>();
+        datosProyecto.add(proyecto.getNombre());
+        
+        // Formatear fecha inicio correctamente para dd-MM-yyyy
+        String fechaInicioFormateada = "";
+        if (proyecto.getFechaInicio() != null) {
+            SimpleDateFormat formato = new SimpleDateFormat("dd-MM-yyyy");
+            fechaInicioFormateada = formato.format(proyecto.getFechaInicio());
+        }
+        datosProyecto.add(fechaInicioFormateada);
+        
+        // Formatear fecha fin correctamente para dd-MM-yyyy
+        String fechaFinFormateada = "";
+        if (proyecto.getFechaFin() != null) {
+            SimpleDateFormat formato = new SimpleDateFormat("dd-MM-yyyy");
+            fechaFinFormateada = formato.format(proyecto.getFechaFin());
+        }
+        datosProyecto.add(fechaFinFormateada);
+        
+        datosProyecto.add(proyecto.getDescripcion());
+        datosProyecto.add(proyecto.getEstado().toString());
+        
+        vista.editarProyecto(datosProyecto);
+        System.out.println("[LOG] Presenter.verProyecto() - Completado");
+    }
+    
+    private void guardarCambiosProyecto() {
+        System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Iniciando para proyecto: " + proyectoActual);
+        if (proyectoActual == null) {
+            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - ERROR: No hay proyecto seleccionado");
+            vista.showErrorMessage("No hay proyecto seleccionado");
+            return;
+        }
+        
+        // Leer valores desde la vista
+        String nombreRaw = vista.getNombreProyecto();
+        String nombre = (nombreRaw != null) ? nombreRaw.trim() : null;
+        Date fechaInicio = vista.getFechaInicioProyecto();
+        Date fechaFin = vista.getFechaFinProyecto();
+        String descripcionRaw = vista.getDescripcionProyecto();
+        String descripcion = (descripcionRaw != null) ? descripcionRaw.trim() : null;
+        String estadoRaw = vista.getEstadoProyecto();
+        String estado = (estadoRaw != null) ? estadoRaw.trim() : null;
+        
+        System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Datos leídos");
+        
+        // Validaciones
+        if (nombre == null || nombre.isEmpty()) {
+            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - ERROR: Nombre vacío");
+            vista.showErrorMessage("El nombre del proyecto es obligatorio.");
+            return;
+        }
+        if (fechaInicio == null) {
+            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - ERROR: Fecha inicio vacía");
+            vista.showErrorMessage("La fecha de inicio es obligatoria.");
+            return;
+        }
+        if (descripcion == null || descripcion.isEmpty()) {
+            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - ERROR: Descripción vacía");
+            vista.showErrorMessage("La descripción es obligatoria.");
+            return;
+        }
+        if (estado == null || estado.isEmpty()) {
+            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - ERROR: Estado vacío");
+            vista.showErrorMessage("El estado es obligatorio.");
+            return;
+        }
+        if (fechaFin != null && fechaFin.before(fechaInicio)) {
+            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - ERROR: Fechas inconsistentes");
+            vista.showErrorMessage("La fecha de finalización no puede ser anterior a la fecha de inicio.");
+            return;
+        }
+        
+        // Actualizar en el modelo
+        System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualizando campos en BD");
+        
+        // Actualizar nombre si cambió
+        if (!nombre.equals(proyectoActual)) {
+            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualizando nombre de '" + proyectoActual + "' a '" + nombre + "'");
+            gestorProyecto.actualizarProyectoCampo(proyectoActual, "nombre", nombre);
+            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualización nombre completada");
+            proyectoActual = nombre; // Actualizar referencia
+            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Referencia interna actualizada a: " + proyectoActual);
+        }
+        
+        System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualizando descripción: '" + descripcion + "'");
+        gestorProyecto.actualizarProyectoCampo(proyectoActual, "descripcion", descripcion);
+        System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualización descripción completada");
+        
+        System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualizando fecha inicio: " + fechaInicio);
+        gestorProyecto.actualizarProyectoCampo(proyectoActual, "fecha_inicio", fechaInicio);
+        System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualización fecha inicio completada");
+        
+        if (fechaFin != null) {
+            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualizando fecha fin: " + fechaFin);
+            gestorProyecto.actualizarProyectoCampo(proyectoActual, "fecha_fin", fechaFin);
+            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualización fecha fin completada");
+        }
+        
+        System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualizando estado: '" + estado + "'");
+        gestorProyecto.actualizarProyectoCampo(proyectoActual, "estado", estado);
+        System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualización estado completada");
+        
+        System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Proyecto actualizado exitosamente");
+        vista.showMessage("Proyecto actualizado exitosamente.");
+        vista.bienvenida();
+    }
+    
+    private void eliminarProyecto() {
+        System.out.println("[LOG] Presenter.eliminarProyecto() - Iniciando para proyecto: " + proyectoActual);
+        if (proyectoActual == null) {
+            System.out.println("[LOG] Presenter.eliminarProyecto() - ERROR: No hay proyecto seleccionado");
+            vista.showErrorMessage("No hay proyecto seleccionado");
+            return;
+        }
+        
+        int respuesta = javax.swing.JOptionPane.showConfirmDialog(
+            vista,
+            "¿Está seguro de que desea eliminar el proyecto '" + proyectoActual + "'?",
+            "Confirmar eliminación",
+            javax.swing.JOptionPane.YES_NO_OPTION
+        );
+        
+        if (respuesta == javax.swing.JOptionPane.YES_OPTION) {
+            System.out.println("[LOG] Presenter.eliminarProyecto() - Eliminando proyecto");
+            gestorProyecto.eliminarProyectoConDependencias(proyectoActual);
+            System.out.println("[LOG] Presenter.eliminarProyecto() - Proyecto eliminado exitosamente");
+            vista.showMessage("Proyecto eliminado exitosamente.");
+            proyectoActual = null;
+            vista.bienvenida();
+        } else {
+            System.out.println("[LOG] Presenter.eliminarProyecto() - Eliminación cancelada por usuario");
+        }
+    }
+    
+    private void cancelar() {
+        vista.bienvenida();
+    }
+    
+    // ==================== ACTIVIDADES ====================
+    
+    private void crearActividad() {
+        if (proyectoActual == null) {
+            vista.showErrorMessage("No hay proyecto seleccionado");
+            return;
+        }
+        
+        String[] tiposActividad = {"CAPACITACION", "ASISTENCIA_TECNICA", "DOTACION_EQUIPOS", "SEGUIMIENTO", "SOCIALIZACION"};
+        vista.crearActividad(tiposActividad, proyectoActual);
+    }
+    
+    private void verActividades() {
+        System.out.println("[LOG] Presenter.verActividades() - Iniciando para proyecto: " + proyectoActual);
+        if (proyectoActual == null) {
+            System.out.println("[LOG] Presenter.verActividades() - ERROR: No hay proyecto seleccionado");
+            vista.showErrorMessage("No hay proyecto seleccionado");
+            return;
+        }
+        
+        List<Actividad> actividades = gestorProyecto.consultarActividadesDeProyecto(proyectoActual);
+        List<String> nombresActividades = new java.util.ArrayList<>();
+        
+        for (Actividad act : actividades) {
+            nombresActividades.add(act.getNombre());
+        }
+        
+        System.out.println("[LOG] Presenter.verActividades() - Encontradas " + nombresActividades.size() + " actividades");
+        vista.verActividades(nombresActividades, proyectoActual);
+        System.out.println("[LOG] Presenter.verActividades() - Completado");
+    }
+    
+    private void verActividad(String nombreActividad) {
+        if (proyectoActual == null) {
+            vista.showErrorMessage("No hay proyecto seleccionado");
+            return;
+        }
+        
+        this.actividadActual = nombreActividad;
+        Actividad actividad = gestorProyecto.consultarActividad(proyectoActual, nombreActividad);
+        
+        if (actividad == null) {
+            vista.showErrorMessage("Actividad no encontrada: " + nombreActividad);
+            return;
+        }
+        
+        // Preparar datos de la actividad (orden correcto para EditarActividad)
+        List<String> datosActividad = new java.util.ArrayList<>();
+        datosActividad.add(actividad.getNombre());
+        // Formatear fecha correctamente para dd-MM-yyyy
+        String fechaFormateada = "";
+        if (actividad.getFecha() != null) {
+            SimpleDateFormat formato = new SimpleDateFormat("dd-MM-yyyy");
+            fechaFormateada = formato.format(actividad.getFecha());
+        }
+        datosActividad.add(fechaFormateada);
+        datosActividad.add(actividad.getTipo().toString());
+        datosActividad.add(actividad.getDescripcion());
+        
+        String[] tiposActividad = {"CAPACITACION", "ASISTENCIA_TECNICA", "DOTACION_EQUIPOS", "SEGUIMIENTO", "SOCIALIZACION"};
+        vista.editarActividad(tiposActividad, proyectoActual, datosActividad);
+    }
+    
+    private void guardarActividad() {
+        if (proyectoActual == null) {
+            vista.showErrorMessage("No hay proyecto seleccionado");
+            return;
+        }
+        
+        // Leer valores desde la vista
+        String nombreRaw = vista.getNombreActividad();
+        String nombre = (nombreRaw != null) ? nombreRaw.trim() : null;
+        Date fecha = vista.getFechaActividad();
+        String tipoRaw = vista.getTipoActividad();
+        String tipo = (tipoRaw != null) ? tipoRaw.trim() : null;
+        String descripcionRaw = vista.getDescripcionActividad();
+        String descripcion = (descripcionRaw != null) ? descripcionRaw.trim() : null;
+        
+        // Validaciones
+        if (nombre == null || nombre.isEmpty()) {
+            vista.showErrorMessage("El nombre de la actividad es obligatorio.");
+            return;
+        }
+        if (fecha == null) {
+            vista.showErrorMessage("La fecha de la actividad es obligatoria.");
+            return;
+        }
+        if (tipo == null || tipo.isEmpty()) {
+            vista.showErrorMessage("El tipo de actividad es obligatorio.");
+            return;
+        }
+        if (descripcion == null || descripcion.isEmpty()) {
+            vista.showErrorMessage("La descripción de la actividad es obligatoria.");
+            return;
+        }
+        
+        // Registrar actividad
+        try {
+            co.edu.uptc.model.TipoActividad tipoActividad = co.edu.uptc.model.TipoActividad.valueOf(tipo.toUpperCase());
+            gestorProyecto.registrarActividad(proyectoActual, nombre, descripcion, tipoActividad, fecha);
+            vista.showMessage("Actividad creada exitosamente.");
+            verActividades();
+        } catch (IllegalArgumentException e) {
+            vista.showErrorMessage("Tipo de actividad inválido: " + tipo);
+        }
+    }
+    
+    private void guardarCambiosActividad() {
+        if (proyectoActual == null || actividadActual == null) {
+            vista.showErrorMessage("No hay actividad seleccionada");
+            return;
+        }
+        
+        // Leer valores desde la vista
+        String nombreRaw = vista.getNombreActividad();
+        String nombre = (nombreRaw != null) ? nombreRaw.trim() : null;
+        Date fecha = vista.getFechaActividad();
+        String tipoRaw = vista.getTipoActividad();
+        String tipo = (tipoRaw != null) ? tipoRaw.trim() : null;
+        String descripcionRaw = vista.getDescripcionActividad();
+        String descripcion = (descripcionRaw != null) ? descripcionRaw.trim() : null;
+        
+        // Validaciones
+        if (nombre == null || nombre.isEmpty()) {
+            vista.showErrorMessage("El nombre de la actividad es obligatorio.");
+            return;
+        }
+        if (fecha == null) {
+            vista.showErrorMessage("La fecha de la actividad es obligatoria.");
+            return;
+        }
+        if (tipo == null || tipo.isEmpty()) {
+            vista.showErrorMessage("El tipo de actividad es obligatorio.");
+            return;
+        }
+        if (descripcion == null || descripcion.isEmpty()) {
+            vista.showErrorMessage("La descripción de la actividad es obligatoria.");
+            return;
+        }
+        
+        // Actualizar actividad
+        try {
+            System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actualizando campos en BD");
+            
+            // Actualizar nombre si cambió
+            if (!nombre.equals(actividadActual)) {
+                System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actualizando nombre de '" + actividadActual + "' a '" + nombre + "'");
+                gestorProyecto.actualizarActividadCampo(proyectoActual, actividadActual, "nombre", nombre);
+                System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actualización nombre completada");
+                actividadActual = nombre; // Actualizar referencia
+                System.out.println("[LOG] Presenter.guardarCambiosActividad() - Referencia interna actualizada a: " + actividadActual);
+            }
+            
+            System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actualizando descripción: '" + descripcion + "'");
+            gestorProyecto.actualizarActividadCampo(proyectoActual, actividadActual, "descripcion", descripcion);
+            System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actualización descripción completada");
+            
+            System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actualizando tipo: '" + tipo + "'");
+            gestorProyecto.actualizarActividadCampo(proyectoActual, actividadActual, "tipo", tipo);
+            System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actualización tipo completada");
+            
+            System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actualizando fecha: " + fecha);
+            gestorProyecto.actualizarActividadCampo(proyectoActual, actividadActual, "fecha", fecha);
+            System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actualización fecha completada");
+            
+            System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actividad actualizada exitosamente");
+            vista.showMessage("Actividad actualizada exitosamente.");
+            verActividades();
+        } catch (Exception e) {
+            System.err.println("[LOG] Presenter.guardarCambiosActividad() - ERROR: " + e.getMessage());
+            vista.showErrorMessage("Error al actualizar la actividad: " + e.getMessage());
+        }
+    }
+    
+    private void eliminarActividad(String nombreActividad) {
+        if (proyectoActual == null) {
+            vista.showErrorMessage("No hay proyecto seleccionado");
+            return;
+        }
+        
+        int respuesta = javax.swing.JOptionPane.showConfirmDialog(
+            null,
+            "¿Está seguro de que desea eliminar la actividad '" + nombreActividad + "'?",
+            "Confirmar eliminación",
+            javax.swing.JOptionPane.YES_NO_OPTION
+        );
+        
+        if (respuesta == javax.swing.JOptionPane.YES_OPTION) {
+            gestorProyecto.eliminarActividad(proyectoActual, nombreActividad);
+            vista.showMessage("Actividad eliminada exitosamente.");
+            actividadActual = null;
+            verActividades();
+        }
+    }
+    
+    // ==================== DOCUMENTOS ====================
+    
+    private void subirDocumento() {
+        System.out.println("[LOG] Presenter.subirDocumento() - Iniciando para proyecto: " + proyectoActual);
+        if (proyectoActual == null) {
+            System.out.println("[LOG] Presenter.subirDocumento() - ERROR: No hay proyecto seleccionado");
+            vista.showErrorMessage("No hay proyecto seleccionado");
+            return;
+        }
+        
+        String[] tiposDocumento = {"ACTA", "PROPUESTA", "INFORMES", "SOPORTE_FINANCIERO", "MATERIAL_TECNICO"};
+        System.out.println("[LOG] Presenter.subirDocumento() - Mostrando formulario subir documento");
+        vista.subirDocumento(tiposDocumento, proyectoActual);
+        System.out.println("[LOG] Presenter.subirDocumento() - Completado");
+    }
+    
+    private void verDocumentos() {
+        System.out.println("[LOG] Presenter.verDocumentos() - Iniciando para proyecto: " + proyectoActual);
+        if (proyectoActual == null) {
+            System.out.println("[LOG] Presenter.verDocumentos() - ERROR: No hay proyecto seleccionado");
+            vista.showErrorMessage("No hay proyecto seleccionado");
+            return;
+        }
+        
+        List<String> documentos = gestorProyecto.obtenerNombresDocumentosDeProyecto(proyectoActual);
+        System.out.println("[LOG] Presenter.verDocumentos() - Encontrados " + documentos.size() + " documentos");
+        vista.verDocumentos(documentos, proyectoActual);
+        System.out.println("[LOG] Presenter.verDocumentos() - Completado");
+    }
+    
+    private void descargarDocumento(String nombreDocumento, String nombreProyecto) {
+        String rutaDestino = new java.io.File(System.getProperty("user.home") + "/Downloads").getAbsolutePath();
+        gestorProyecto.descargarDocumento(nombreProyecto, nombreDocumento, rutaDestino);
+        vista.showMessage("Documento descargado exitosamente en: " + rutaDestino);
+    }
+    
+    private void eliminarDocumento(String nombreDocumento, String nombreProyecto) {
+        int respuesta = javax.swing.JOptionPane.showConfirmDialog(
+            null,
+            "¿Está seguro de que desea eliminar el documento '" + nombreDocumento + "'?",
+            "Confirmar eliminación",
+            javax.swing.JOptionPane.YES_NO_OPTION
+        );
+        
+        if (respuesta == javax.swing.JOptionPane.YES_OPTION) {
+            gestorProyecto.eliminarDocumento(nombreProyecto, nombreDocumento);
+            vista.showMessage("Documento eliminado exitosamente.");
+            verDocumentos();
+        }
+    }
+    
+    private void guardarDocumento() {
+        if (proyectoActual == null) {
+            vista.showErrorMessage("No hay proyecto seleccionado");
+            return;
+        }
+        
+        // Leer valores desde la vista
+        String nombreRaw = vista.getNombreDocumento();
+        String nombre = (nombreRaw != null) ? nombreRaw.trim() : null;
+        String tipoRaw = vista.getTipoDocumento();
+        String tipo = (tipoRaw != null) ? tipoRaw.trim() : null;
+        String rutaArchivo = vista.getRutaArchivoDocumento();
+        
+        // Validaciones
+        if (nombre == null || nombre.isEmpty()) {
+            vista.showErrorMessage("El nombre del documento es obligatorio.");
+            return;
+        }
+        if (tipo == null || tipo.isEmpty()) {
+            vista.showErrorMessage("El tipo de documento es obligatorio.");
+            return;
+        }
+        if (rutaArchivo == null || rutaArchivo.isEmpty()) {
+            vista.showErrorMessage("Debe seleccionar un archivo.");
+            return;
+        }
+        
+        // Registrar documento
+        System.out.println("[LOG] Presenter.guardarDocumento() - Registrando documento:");
+        System.out.println("   - Proyecto: " + proyectoActual);
+        System.out.println("   - Nombre: " + nombre);
+        System.out.println("   - Tipo: " + tipo);
+        System.out.println("   - Ruta: " + rutaArchivo);
+        
+        gestorProyecto.registrarDocumento(proyectoActual, nombre, tipo, rutaArchivo);
+        vista.showMessage("Documento guardado exitosamente.");
+        vista.bienvenida();
+    }
+    
+    private void seleccionarArchivo() {
+        System.out.println("[LOG] Presenter.seleccionarArchivo() - Iniciando diálogo de selección");
+        
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Seleccionar archivo para subir");
+        
+        // Filtros para tipos de archivo comunes
+        FileNameExtensionFilter filterPDF = new FileNameExtensionFilter("Documentos PDF (*.pdf)", "pdf");
+        FileNameExtensionFilter filterDOC = new FileNameExtensionFilter("Documentos Word (*.doc, *.docx)", "doc", "docx");
+        FileNameExtensionFilter filterIMG = new FileNameExtensionFilter("Imágenes (*.jpg, *.png, *.jpeg)", "jpg", "png", "jpeg");
+        FileNameExtensionFilter filterALL = new FileNameExtensionFilter("Todos los archivos", "*");
+        
+        fileChooser.addChoosableFileFilter(filterPDF);
+        fileChooser.addChoosableFileFilter(filterDOC);
+        fileChooser.addChoosableFileFilter(filterIMG);
+        fileChooser.setFileFilter(filterALL);
+        
+        int resultado = fileChooser.showOpenDialog(null);
+        
+        if (resultado == JFileChooser.APPROVE_OPTION) {
+            File archivoSeleccionado = fileChooser.getSelectedFile();
+            String rutaArchivo = archivoSeleccionado.getAbsolutePath();
+            String nombreArchivo = archivoSeleccionado.getName();
+            
+            System.out.println("[LOG] Presenter.seleccionarArchivo() - Archivo seleccionado: " + nombreArchivo);
+            System.out.println("[LOG] Presenter.seleccionarArchivo() - Ruta: " + rutaArchivo);
+            
+            // Notificar a la vista que se seleccionó un archivo
+            vista.setArchivoSeleccionado(rutaArchivo, nombreArchivo);
+        } else {
+            System.out.println("[LOG] Presenter.seleccionarArchivo() - Selección cancelada");
+        }
+    }
+    
+    private void buscarProyectos() {
+        System.out.println("[LOG] Presenter.buscarProyectos() - Iniciando búsqueda");
+        
+        String textoBusqueda = vista.getTextoBusquedaProyectos();
+        if (textoBusqueda == null || textoBusqueda.trim().isEmpty()) {
+            System.out.println("[LOG] Presenter.buscarProyectos() - Texto de búsqueda vacío, mostrando todos");
+            verProyectos();
+            return;
+        }
+        
+        textoBusqueda = textoBusqueda.trim().toLowerCase();
+        System.out.println("[LOG] Presenter.buscarProyectos() - Buscando: '" + textoBusqueda + "'");
+        
+        // Cargar todos los proyectos
+        gestorProyecto.cargarTodoDesdeBD();
+        List<String> todosLosProyectos = gestorProyecto.getNombresProyectos();
+        
+        // Filtrar proyectos que contienen el texto de búsqueda
+        List<String> proyectosFiltrados = new java.util.ArrayList<>();
+        for (String proyecto : todosLosProyectos) {
+            if (proyecto.toLowerCase().contains(textoBusqueda)) {
+                proyectosFiltrados.add(proyecto);
+            }
+        }
+        
+        System.out.println("[LOG] Presenter.buscarProyectos() - Encontrados " + proyectosFiltrados.size() + " proyectos");
+        vista.verProyectos(proyectosFiltrados);
+        
+        if (proyectosFiltrados.isEmpty()) {
+            vista.showInfoMessage("No se encontraron proyectos que contengan: '" + textoBusqueda + "'");
+        }
+    }
+    
+    private void buscarActividades() {
+        System.out.println("[LOG] Presenter.buscarActividades() - Iniciando búsqueda");
+        
+        if (proyectoActual == null) {
+            vista.showErrorMessage("No hay proyecto seleccionado");
+            return;
+        }
+        
+        String textoBusqueda = vista.getTextoBusquedaActividades();
+        if (textoBusqueda == null || textoBusqueda.trim().isEmpty()) {
+            System.out.println("[LOG] Presenter.buscarActividades() - Texto de búsqueda vacío, mostrando todas");
+            verActividades();
+            return;
+        }
+        
+        textoBusqueda = textoBusqueda.trim().toLowerCase();
+        System.out.println("[LOG] Presenter.buscarActividades() - Buscando: '" + textoBusqueda + "' en proyecto: " + proyectoActual);
+        
+        // Obtener todas las actividades del proyecto
+        List<Actividad> actividades = gestorProyecto.consultarActividadesDeProyecto(proyectoActual);
+        List<String> todasLasActividades = new java.util.ArrayList<>();
+        for (Actividad act : actividades) {
+            todasLasActividades.add(act.getNombre());
+        }
+        
+        // Filtrar actividades que contienen el texto de búsqueda
+        List<String> actividadesFiltradas = new java.util.ArrayList<>();
+        for (String actividad : todasLasActividades) {
+            if (actividad.toLowerCase().contains(textoBusqueda)) {
+                actividadesFiltradas.add(actividad);
+            }
+        }
+        
+        System.out.println("[LOG] Presenter.buscarActividades() - Encontradas " + actividadesFiltradas.size() + " actividades");
+        vista.verActividades(actividadesFiltradas, proyectoActual);
+        
+        if (actividadesFiltradas.isEmpty()) {
+            vista.showInfoMessage("No se encontraron actividades que contengan: '" + textoBusqueda + "'");
+        }
+    }
+    
+    private void buscarDocumentos() {
+        System.out.println("[LOG] Presenter.buscarDocumentos() - Iniciando búsqueda");
+        
+        if (proyectoActual == null) {
+            vista.showErrorMessage("No hay proyecto seleccionado");
+            return;
+        }
+        
+        String textoBusqueda = vista.getTextoBusquedaDocumentos();
+        if (textoBusqueda == null || textoBusqueda.trim().isEmpty()) {
+            System.out.println("[LOG] Presenter.buscarDocumentos() - Texto de búsqueda vacío, mostrando todos");
+            verDocumentos();
+            return;
+        }
+        
+        textoBusqueda = textoBusqueda.trim().toLowerCase();
+        System.out.println("[LOG] Presenter.buscarDocumentos() - Buscando: '" + textoBusqueda + "' en proyecto: " + proyectoActual);
+        
+        // Obtener todos los documentos del proyecto
+        List<String> todosLosDocumentos = gestorProyecto.obtenerNombresDocumentosDeProyecto(proyectoActual);
+        
+        // Filtrar documentos que contienen el texto de búsqueda
+        List<String> documentosFiltrados = new java.util.ArrayList<>();
+        for (String documento : todosLosDocumentos) {
+            if (documento.toLowerCase().contains(textoBusqueda)) {
+                documentosFiltrados.add(documento);
+            }
+        }
+        
+        System.out.println("[LOG] Presenter.buscarDocumentos() - Encontrados " + documentosFiltrados.size() + " documentos");
+        vista.verDocumentos(documentosFiltrados, proyectoActual);
+        
+        if (documentosFiltrados.isEmpty()) {
+            vista.showInfoMessage("No se encontraron documentos que contengan: '" + textoBusqueda + "'");
+        }
     }
 }

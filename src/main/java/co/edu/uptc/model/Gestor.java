@@ -185,7 +185,7 @@ public class Gestor {
         return new ArrayList<>(proyectos);
     }
 
-    private Proyecto buscarProyectoPorNombre(String nombre) {
+    public Proyecto buscarProyectoPorNombre(String nombre) {
         for (Proyecto p : proyectos) {
             if (p.getNombre().equalsIgnoreCase(nombre))
                 return p;
