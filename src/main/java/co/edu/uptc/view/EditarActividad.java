@@ -58,9 +58,9 @@ public class EditarActividad extends JPanel{
         this.botones();
     }
     private void encabezados(){
-        this.titulo = new Texto("Modificar o Eliminar Actividad", TipoTexto.TITULO, "VERDE");
+        this.titulo = new Texto("Actualizar o Eliminar Actividad", TipoTexto.TITULO, "VERDE");
         this.subtitulo = new Texto(nombreProyecto.toUpperCase() , TipoTexto.NORMAL, "VERDE");
-        this.instruccion = new Texto("<html> Puedes modificar la información de los campos, para guardar los cambios has click en el botón 'Guardar',  para eliminar  <br> has click en el botón 'Eliminar'</html>", TipoTexto.INSTRUCCION, "VERDE");
+        this.instruccion = new Texto("<html> Puedes modificar la información de los campos, para guardar los cambios has click en el botón 'Guardar',  para eliminar el registro <br> has click en el botón 'Eliminar'</html>", TipoTexto.INSTRUCCION, "VERDE");
     }
     private void camposFormulario(){
         this.campoNombre = new IngresarCampo(15);
@@ -74,7 +74,7 @@ public class EditarActividad extends JPanel{
         this.descripcion.setText(datosActividad.get(3));
     }
     private void botones(){
-        this.crearActividad = new Boton("Guardar", 160, 40, "EDITAR_ACTIVIDAD"+nombreProyecto, 15, color.getVerdeClaro());
+        this.crearActividad = new Boton("Actualizar", 160, 40, "EDITAR_ACTIVIDAD"+nombreProyecto, 15, color.getVerdeClaro());
         this.cancelar = new Boton("Cancelar", 160, 40, "VOLVER_VER_ACTIVIDADES", 15, color.getVerdeOscuro());
         this.eliminar = new Boton("Eliminar", 160, 40, "ELIMINAR_ACTIVIDAD"+nombreProyecto, 15, color.getVerdeOscuro());
     }
@@ -148,8 +148,6 @@ public class EditarActividad extends JPanel{
         panelDerecho.setLayout(new BoxLayout(panelDerecho, BoxLayout.Y_AXIS));
         panelDerecho.setBackground(color.getBeige());
 
-        
-
         JPanel pDescripcion = crearFila(new Texto("* Descripción:      ", TipoTexto.NORMAL, "VERDE"), descripcion);
         panelDerecho.add(pDescripcion);
 
@@ -163,7 +161,7 @@ public class EditarActividad extends JPanel{
         panelIzquierdo.setBackground(color.getBeige());
         panelIzquierdo.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         panelIzquierdo.add(Box.createVerticalStrut(20));
-        
+
         JPanel pNombre = crearFila(new Texto(     "* Nombre:  ", TipoTexto.NORMAL, "VERDE"), campoNombre);
         panelIzquierdo.add(pNombre);
 

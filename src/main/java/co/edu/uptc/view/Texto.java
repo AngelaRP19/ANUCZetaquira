@@ -87,11 +87,11 @@ public class Texto extends JLabel{
                     }
                     try (InputStream myStream = new BufferedInputStream(resourceStream)) {
                         Font myFont = Font.createFont(Font.TRUETYPE_FONT, myStream);
-                        this.fuente = myFont.deriveFont(Font.BOLD, 25f);
+                        this.fuente = myFont.deriveFont(Font.BOLD, 23f);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    this.fuente = new Font(Font.SERIF, Font.BOLD, 25);
+                    this.fuente = new Font(Font.SERIF, Font.BOLD, 23);
                     System.out.println("aaaaaaaaaaaaaa");
                 }
                 this.setFont(this.fuente);

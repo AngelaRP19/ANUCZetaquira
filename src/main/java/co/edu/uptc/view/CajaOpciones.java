@@ -64,11 +64,11 @@ public class CajaOpciones extends JComboBox<String> {
             }
             try (InputStream myStream = new BufferedInputStream(resourceStream)) {
                 Font myFont = Font.createFont(Font.TRUETYPE_FONT, myStream); 
-                this.fuente = myFont.deriveFont(23f);
+                this.fuente = myFont.deriveFont(20f);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            this.fuente = new Font(Font.SERIF, Font.PLAIN, 25);
+            this.fuente = new Font(Font.SERIF, Font.PLAIN, 20);
         }    
     }
 

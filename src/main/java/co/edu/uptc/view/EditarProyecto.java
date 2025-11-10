@@ -32,6 +32,7 @@ public class EditarProyecto extends JPanel{
     private IngresarFecha campoFechaInicio;
     private IngresarFecha campoFechaFin;
     private AreaTexto descripcion;
+    private CajaOpciones estado;
     private Icon editar;
 
     private Boton guardarCambios;
@@ -62,8 +63,8 @@ public class EditarProyecto extends JPanel{
         this.botones();
     }
     private void encabezados(){
-        this.titulo = new Texto(this.datos.get(0), TipoTexto.TITULO, "VERDE");
-        this.subtitulo = new Texto("  DATOS DEL PROYECTO", TipoTexto.NORMAL, "VERDE");
+        this.titulo = new Texto("Editar o Eliminar Proyecto", TipoTexto.TITULO, "VERDE");
+        this.subtitulo = new Texto("  DATOS DEL PROYECTO: "+this.datos.get(0), TipoTexto.NORMAL, "VERDE");
         this.instruccion = new Texto("Puedes modificar los datos, para guardar los cambios has click en el botón 'GUARDAR CAMBIOS'  ", TipoTexto.INSTRUCCION, "VERDE");
     }
     private void camposFormulario(){
@@ -73,9 +74,11 @@ public class EditarProyecto extends JPanel{
         setFechaDesdeString(this.campoFechaInicio, this.datos.get(1));
         this.campoFechaFin = new IngresarFecha(331);
         setFechaDesdeString(this.campoFechaFin, this.datos.get(2));
+        this.estado = new CajaOpciones(new String[]{"ACTIVO", "FINALIZADO", "SUSPENDIDO"}, 300);
+        this.estado.setSelectedItem(this.datos.get(3));
         this.descripcion = new AreaTexto(5, 22);
         this.descripcion.setPreferredSize(new Dimension(400, 120));
-        this.descripcion.setText(this.datos.get(3));
+        this.descripcion.setText(this.datos.get(4));
         this.editar = this.leerIcono();
     }
     
@@ -137,7 +140,7 @@ public class EditarProyecto extends JPanel{
         titulo.setAlignmentX(CENTER_ALIGNMENT);
         cabecera.add(titulo);
         cabecera.add(Box.createVerticalStrut(5)); 
-        cabecera.add(crearSubPanel(subtitulo));
+        //cabecera.add(crearSubPanel(subtitulo));
         cabecera.add(crearSubPanel(instruccion));
 
         add(cabecera, BorderLayout.NORTH);
@@ -176,9 +179,11 @@ public class EditarProyecto extends JPanel{
         JPanel panelDerecho = new JPanel();
         panelDerecho.setLayout(new BoxLayout(panelDerecho, BoxLayout.Y_AXIS));
         panelDerecho.setBackground(color.getBeige());
+        panelDerecho.setAlignmentY(CENTER_ALIGNMENT);
+        panelDerecho.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 150));
 
         Texto lblDocs = new Texto("Documentos", TipoTexto.NORMAL, "VERDE");
-        lblDocs.setAlignmentX(LEFT_ALIGNMENT);
+        lblDocs.setAlignmentX(CENTER_ALIGNMENT);
         panelDerecho.add(lblDocs);
         panelDerecho.add(Box.createVerticalStrut(8));
         panelDerecho.add(crearSubPanel(subirDocumento));
@@ -187,7 +192,7 @@ public class EditarProyecto extends JPanel{
         panelDerecho.add(Box.createVerticalStrut(16));
 
         Texto lblActs = new Texto("Actividades", TipoTexto.NORMAL, "VERDE");
-        lblActs.setAlignmentX(LEFT_ALIGNMENT);
+        lblActs.setAlignmentX(CENTER_ALIGNMENT);
         panelDerecho.add(lblActs);
         panelDerecho.add(Box.createVerticalStrut(8));
         panelDerecho.add(crearSubPanel(registrarActividad));
@@ -197,10 +202,10 @@ public class EditarProyecto extends JPanel{
     }
 
     private JPanel crearSubPanel(JComponent comp) {
-        JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
         p.setBackground(color.getBeige());
         p.add(comp);
-        p.setAlignmentX(LEFT_ALIGNMENT);
+        p.setAlignmentX(CENTER_ALIGNMENT);
         return p;
     }
 
@@ -216,8 +221,11 @@ public class EditarProyecto extends JPanel{
         JPanel pFechaInicio = crearFila(new Texto("* Fecha de Inicio:              ", TipoTexto.NORMAL, "VERDE"), campoFechaInicio);
         panelIzquierdo.add(pFechaInicio);
 
-        JPanel pFechaFin = crearFila(new Texto(   "* Fecha de Finalización:    ", TipoTexto.NORMAL, "VERDE"), campoFechaFin);
+        JPanel pFechaFin = crearFila(new Texto(   "  Fecha de Finalización:    ", TipoTexto.NORMAL, "VERDE"), campoFechaFin);
         panelIzquierdo.add(pFechaFin);
+
+        JPanel pEstado = crearFila(new Texto(      "* Estado:                          ", TipoTexto.NORMAL, "VERDE"), estado);
+        panelIzquierdo.add(pEstado);
 
         JPanel pDescripcion = crearFila(new Texto("* Descripción:    ", TipoTexto.NORMAL, "VERDE"), descripcion);
         panelIzquierdo.add(pDescripcion);

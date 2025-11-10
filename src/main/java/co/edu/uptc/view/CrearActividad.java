@@ -37,7 +37,7 @@ public class CrearActividad extends JPanel{
         this.nombreProyecto = nombreProyecto;
         setLayout(new BorderLayout());
         setBackground(color.getBeige());
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 10));
+        setBorder(BorderFactory.createEmptyBorder(10, 15, 20, 10));
         inicializarComponentes();
         ubicarComponentes();
         agregarActionListeners();
@@ -49,16 +49,16 @@ public class CrearActividad extends JPanel{
         this.botones();
     }
     private void encabezados(){
-        this.titulo = new Texto("Registrar Actividad", TipoTexto.TITULO, "VERDE");
-        this.subtitulo = new Texto(nombreProyecto.toUpperCase() + ":  DATOS DE LA ACTIVIDAD. ", TipoTexto.NORMAL, "VERDE");
+        this.titulo = new Texto("Crear Actividad", TipoTexto.TITULO, "VERDE");
+        this.subtitulo = new Texto("  "+nombreProyecto.toUpperCase() , TipoTexto.NORMAL, "VERDE");
         this.instruccion = new Texto("  Por favor, llene los campos obligatorios * correspondientes a la actividad o evento a registrar", TipoTexto.INSTRUCCION, "VERDE");
     }
     private void camposFormulario(){
         this.campoNombre = new IngresarCampo(13);
         this.campoFecha = new IngresarFecha(320);
         this.tipo = new CajaOpciones(tiposActividad, 283);
-        this.descripcion = new AreaTexto(5, 22);
-        this.descripcion.setPreferredSize(new Dimension(450, 200));
+        this.descripcion = new AreaTexto(5, 30);
+        this.descripcion.setPreferredSize(new Dimension(500, 200));
     }
     private void botones(){
         this.crearActividad = new Boton("Guardar", 160, 40, "GUARDAR_ACTIVIDAD", 15, color.getVerdeClaro());
@@ -118,9 +118,8 @@ public class CrearActividad extends JPanel{
         JPanel panelDerecho = new JPanel();
         panelDerecho.setLayout(new BoxLayout(panelDerecho, BoxLayout.Y_AXIS));
         panelDerecho.setBackground(color.getBeige());
-
-        
-
+        panelDerecho.setBorder(BorderFactory.createEmptyBorder(15, 10, 10, 10));
+    
         JPanel pDescripcion = crearFila(new Texto("* Descripción:      ", TipoTexto.NORMAL, "VERDE"), descripcion);
         panelDerecho.add(pDescripcion);
 
@@ -133,7 +132,8 @@ public class CrearActividad extends JPanel{
         panelIzquierdo.setLayout(new BoxLayout(panelIzquierdo, BoxLayout.Y_AXIS));
         panelIzquierdo.setBackground(color.getBeige());
         panelIzquierdo.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
+        panelIzquierdo.add(Box.createVerticalStrut(20));
+        
         JPanel pNombre = crearFila(new Texto(     "* Nombre:  ", TipoTexto.NORMAL, "VERDE"), campoNombre);
         panelIzquierdo.add(pNombre);
 
@@ -153,7 +153,6 @@ public class CrearActividad extends JPanel{
         this.cancelar.addActionListener(listener);
         
     }
-
     
     public String getNombreProyecto() {
         return campoNombre.getText();
