@@ -74,9 +74,18 @@ public class EditarActividad extends JPanel{
         this.descripcion.setText(datosActividad.get(3));
     }
     private void botones(){
-        this.crearActividad = new Boton("Actualizar", 160, 40, "EDITAR_ACTIVIDAD"+nombreProyecto, 15, color.getVerdeClaro());
-        this.cancelar = new Boton("Cancelar", 160, 40, "VOLVER_VER_ACTIVIDADES", 15, color.getVerdeOscuro());
-        this.eliminar = new Boton("Eliminar", 160, 40, "ELIMINAR_ACTIVIDAD"+nombreProyecto, 15, color.getVerdeOscuro());
+        // Configurar comandos según el contexto (temporal o proyecto existente)
+        if (nombreProyecto.equals("NUEVO_PROYECTO")) {
+            // Comandos para actividades temporales
+            this.crearActividad = new Boton("Actualizar", 160, 40, "EDITAR_ACTIVIDAD_TEMPORAL/" + datosActividad.get(0), 15, color.getVerdeClaro());
+            this.cancelar = new Boton("Cancelar", 160, 40, "VOLVER_VER_ACTIVIDADES/" + nombreProyecto, 15, color.getVerdeOscuro());
+            this.eliminar = new Boton("Eliminar", 160, 40, "ELIMINAR_ACTIVIDAD/" + datosActividad.get(0) + "/" + nombreProyecto, 15, color.getVerdeOscuro());
+        } else {
+            // Comandos para proyectos existentes
+            this.crearActividad = new Boton("Actualizar", 160, 40, "EDITAR_ACTIVIDAD/" + nombreProyecto, 15, color.getVerdeClaro());
+            this.cancelar = new Boton("Cancelar", 160, 40, "VOLVER_VER_ACTIVIDADES/" + nombreProyecto, 15, color.getVerdeOscuro());
+            this.eliminar = new Boton("Eliminar", 160, 40, "ELIMINAR_ACTIVIDAD/" + datosActividad.get(0) + "/" + nombreProyecto, 15, color.getVerdeOscuro());
+        }
     }
 
     private void setFechaDesdeString(IngresarFecha campo, String fechaStr) {

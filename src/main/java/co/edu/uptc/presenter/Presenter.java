@@ -211,30 +211,45 @@ public class Presenter implements ActionListener{
             String nombre = comando.substring("VER_ACTIVIDAD/".length());
             verActividad(nombre);
         }
+        else if (comando.startsWith("VER_ACTIVIDAD_TEMPORAL/")) {
+            String nombre = comando.substring("VER_ACTIVIDAD_TEMPORAL/".length());
+            System.out.println("[LOG] Presenter - Ver actividad temporal: " + nombre);
+            verActividadTemporal(nombre);
+        }
+        else if (comando.startsWith("EDITAR_ACTIVIDAD_TEMPORAL/")) {
+            String nombre = comando.substring("EDITAR_ACTIVIDAD_TEMPORAL/".length());
+            System.out.println("[LOG] Presenter - Editar actividad temporal: " + nombre);
+            editarActividadTemporal(nombre);
+        }
         else if (comando.equals("CREAR_ACTIVIDAD")) {
             guardarActividad();
         }
         else if (comando.equals("EDITAR_ACTIVIDAD")) {
             guardarCambiosActividad();
         }
-        else if (comando.startsWith("ELIMINAR_ACTIVIDAD/")) {
-            String nombre = comando.substring("ELIMINAR_ACTIVIDAD/".length());
-            eliminarActividad(nombre);
+        else if (comando.startsWith("EDITAR_ACTIVIDAD/")) {
+            String nombreProyecto = comando.substring("EDITAR_ACTIVIDAD/".length());
+            System.out.println("[LOG] Presenter - Editar actividad de proyecto existente: " + nombreProyecto);
+            guardarCambiosActividad();
         }
-        else if (comando.startsWith("EDITAR_ACTIVIDAD")) {
-            // Comando para editar actividad (puede venir con formato EDITAR_ACTIVIDADHola)
-            if (comando.equals("EDITAR_ACTIVIDAD")) {
-                guardarCambiosActividad();
-            } else if (comando.startsWith("EDITAR_ACTIVIDAD")) {
-                // Extraer el nombre del proyecto si viene concatenado
-                String resto = comando.substring("EDITAR_ACTIVIDAD".length());
-                if (!resto.isEmpty()) {
-                    guardarCambiosActividad();
-                }
-            }
+        else if (comando.equals("EDITAR_ACTIVIDAD")) {
+            // Comando sin proyecto específico (comportamiento anterior)
+            guardarCambiosActividad();
         }
         else if (comando.startsWith("VOLVER_VER_ACTIVIDADES")) {
-            verActividades();
+            if (comando.contains("/")) {
+                String nombreProyecto = comando.substring(comando.indexOf("/") + 1);
+                System.out.println("[LOG] Presenter - Volver a ver actividades del proyecto: " + nombreProyecto);
+                if (nombreProyecto.equals("NUEVO_PROYECTO")) {
+                    verActividadesNuevoProyecto();
+                } else {
+                    proyectoActual = nombreProyecto;
+                    verActividades();
+                }
+            } else {
+                // Comando sin proyecto específico (comportamiento anterior)
+                verActividades();
+            }
         }
         
         // Documentos
@@ -283,7 +298,7 @@ public class Presenter implements ActionListener{
         }
         else if (comando.startsWith("PANEL_VER_ACTIVIDADES")) {
             String nombre = comando.substring("PANEL_VER_ACTIVIDADES".length());
-            if (!nombre.isEmpty() && !nombre.equals("NUEVO_PROYECTO")) {
+            if (!nombre.isEmpty() && !nombre.equals("_NUEVO_PROYECTO")) {
                 proyectoActual = nombre;
                 verActividades();
             }
@@ -1126,6 +1141,77 @@ public class Presenter implements ActionListener{
         System.out.println("[LOG] Presenter.verActividadesNuevoProyecto() - Encontradas " + nombresActividades.size() + " actividades");
         vista.verActividades(nombresActividades, "NUEVO_PROYECTO");
         System.out.println("[LOG] Presenter.verActividadesNuevoProyecto() - Completado");
+    }
+
+    private void verActividadTemporal(String nombreActividad) {
+        System.out.println("[LOG] Presenter.verActividadTemporal() - Viendo actividad temporal: " + nombreActividad);
+        
+        // Obtener la actividad temporal
+        Actividad actividad = gestorProyecto.getActividadTemporal(nombreActividad);
+        
+        if (actividad == null) {
+            System.out.println("[ERROR] Presenter.verActividadTemporal() - Actividad temporal no encontrada: " + nombreActividad);
+            vista.showErrorMessage("Actividad temporal no encontrada: " + nombreActividad);
+            return;
+        }
+        
+        // Establecer la actividad actual para navegación
+        this.actividadActual = nombreActividad;
+        
+        // Convertir actividad a datos para la vista
+        List<String> datosActividad = new java.util.ArrayList<>();
+        datosActividad.add(actividad.getNombre());
+        datosActividad.add(actividad.getDescripcion());
+        
+        // Formatear fecha
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        datosActividad.add(formatter.format(actividad.getFecha()));
+        datosActividad.add(actividad.getTipo().toString());
+        
+        // Mostrar la vista de editar actividad (que sirve también para ver detalles)
+        vista.editarActividad(tiposActividad, "NUEVO_PROYECTO", datosActividad);
+        
+        System.out.println("[LOG] Presenter.verActividadTemporal() - Completado");
+    }
+
+    private void editarActividadTemporal(String nombreActividad) {
+        System.out.println("[LOG] Presenter.editarActividadTemporal() - Editando actividad temporal: " + nombreActividad);
+        
+        try {
+            // Obtener la actividad temporal actual
+            Actividad actividadAntigua = gestorProyecto.getActividadTemporal(nombreActividad);
+            if (actividadAntigua == null) {
+                vista.showErrorMessage("Actividad temporal no encontrada: " + nombreActividad);
+                return;
+            }
+            
+            // Obtener nuevos datos de la vista
+            String nuevoNombre = vista.getNombreActividad();
+            Date nuevaFecha = vista.getFechaActividad();
+            String nuevoTipo = vista.getTipoActividad();
+            String nuevaDescripcion = vista.getDescripcionActividad();
+            
+            // Validar datos
+            if (!validarDatosActividad(nuevoNombre, nuevaFecha, nuevoTipo, nuevaDescripcion)) {
+                return;
+            }
+            
+            // Eliminar la actividad antigua
+            gestorProyecto.eliminarActividadProyectoTemporal(nombreActividad);
+            
+            // Guardar la actividad actualizada
+            gestorProyecto.guardarActividadNuevoProyecto(nuevoNombre, nuevaFecha, nuevoTipo, nuevaDescripcion);
+            
+            System.out.println("[LOG] Presenter.editarActividadTemporal() - Actividad actualizada exitosamente");
+            vista.showMessage("Actividad actualizada exitosamente.");
+            
+            // Volver a la vista de actividades temporales
+            verActividadesNuevoProyecto();
+            
+        } catch (Exception e) {
+            System.out.println("[ERROR] Presenter.editarActividadTemporal() - " + e.getMessage());
+            vista.showErrorMessage("Error al actualizar actividad: " + e.getMessage());
+        }
     }
 
 

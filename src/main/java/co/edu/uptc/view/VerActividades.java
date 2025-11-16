@@ -152,8 +152,15 @@ public class VerActividades extends JPanel {
             contenedorLista.add(vacio);
         } else {
             for (String nombre : listaActividades) {
-                // Solo instanciamos el botón con el nuevo constructor de configuración interna
-                Boton btn = new Boton(nombre, "VER_ACTIVIDAD/" + nombre , 550, 40, Boton.BotonEstilo.LISTA_PROYECTO);
+                // Generar comando específico según el tipo de proyecto
+                String comando;
+                if (nombreProyecto.equals("NUEVO_PROYECTO")) {
+                    comando = "VER_ACTIVIDAD_TEMPORAL/" + nombre;
+                } else {
+                    comando = "VER_ACTIVIDAD/" + nombre;
+                }
+                
+                Boton btn = new Boton(nombre, comando, 550, 40, Boton.BotonEstilo.LISTA_PROYECTO);
                 contenedorLista.add(btn);
                 contenedorLista.add(Box.createVerticalStrut(10));
                 if (listener != null) {
