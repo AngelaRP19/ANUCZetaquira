@@ -393,6 +393,8 @@ public class Presenter implements ActionListener{
         vista.setFechaFinProyecto(gestorProyecto.getProyectoTemporal().getFechaFin());
         vista.setEstadoProyecto(gestorProyecto.getProyectoTemporal().getEstado().toString());
         vista.setDescripcionProyecto(gestorProyecto.getProyectoTemporal().getDescripcion());
+        // Limpiar paneles de edición para evitar que se lean datos antiguos
+        vista.limpiarPanelEditarActividad();
         System.out.println("[LOG] Presenter.volverACrearProyecto() - Completado");
     }
     private void verDocumentosNuevoProyecto() {
@@ -707,16 +709,16 @@ public class Presenter implements ActionListener{
         
         // Preparar datos de la actividad (orden correcto para EditarActividad)
         List<String> datosActividad = new java.util.ArrayList<>();
-        datosActividad.add(actividad.getNombre());
-        // Formatear fecha correctamente para dd-MM-yyyy
+        datosActividad.add(actividad.getNombre());                    // índice 0: Nombre
+        datosActividad.add(actividad.getDescripcion());               // índice 1: Descripción
+        // Formatear fecha correctamente para dd/MM/yyyy
         String fechaFormateada = "";
         if (actividad.getFecha() != null) {
-            SimpleDateFormat formato = new SimpleDateFormat("dd-MM-yyyy");
+            SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
             fechaFormateada = formato.format(actividad.getFecha());
         }
-        datosActividad.add(fechaFormateada);
-        datosActividad.add(actividad.getTipo().toString());
-        datosActividad.add(actividad.getDescripcion());
+        datosActividad.add(fechaFormateada);                          // índice 2: Fecha
+        datosActividad.add(actividad.getTipo().toString());           // índice 3: Tipo
         
         String[] tiposActividad = {"CAPACITACION", "ASISTENCIA_TECNICA", "DOTACION_EQUIPOS", "SEGUIMIENTO", "SOCIALIZACION"};
         vista.editarActividad(tiposActividad, proyectoActual, datosActividad);
@@ -1073,7 +1075,9 @@ public class Presenter implements ActionListener{
     private void agregarActividadNuevoProyecto() {
         System.out.println("[LOG] Presenter.agregarActividadNuevoProyecto() - Iniciando");
         this.guardarProyectoTemporal();
+        System.out.println("[LOG] Presenter.agregarActividadNuevoProyecto() - Creando nuevo panel CrearActividad");
         vista.crearActividad(tiposActividad, "NUEVO_PROYECTO");
+        System.out.println("[LOG] Presenter.agregarActividadNuevoProyecto() - Panel CrearActividad mostrado");
         System.out.println("[LOG] Presenter.agregarActividadNuevoProyecto() - Completado");
     }
 
@@ -1087,6 +1091,12 @@ public class Presenter implements ActionListener{
             String tipo = vista.getTipoActividad();
             String descripcion = vista.getDescripcionActividad();
             
+            System.out.println("[DEBUG] Presenter.guardarActividadNuevoProyecto() - Datos leídos:");
+            System.out.println("   - Nombre: '" + nombre + "'");
+            System.out.println("   - Tipo: '" + tipo + "'");
+            System.out.println("   - Fecha: " + fecha);
+            System.out.println("   - Descripción: '" + descripcion + "'");
+            
             // Validar datos
             if (!validarDatosActividad(nombre, fecha, tipo, descripcion)) {
                 return;
@@ -1098,7 +1108,7 @@ public class Presenter implements ActionListener{
             System.out.println("[LOG] Presenter.guardarActividadNuevoProyecto() - Actividad guardada exitosamente");
             vista.showMessage("Actividad guardada exitosamente.");
             
-            // Volver a la vista de crear proyecto
+            // Volver a la vista de crear proyecto (para que el usuario pueda agregar más actividades o documentos)
             volverACrearProyecto();
             
         } catch (Exception e) {
@@ -1191,18 +1201,26 @@ public class Presenter implements ActionListener{
             String nuevoTipo = vista.getTipoActividad();
             String nuevaDescripcion = vista.getDescripcionActividad();
             
+            System.out.println("[DEBUG] Presenter.editarActividadTemporal() - Datos leídos:");
+            System.out.println("   - Nombre antiguo: '" + nombreActividad + "'");
+            System.out.println("   - Nombre nuevo: '" + nuevoNombre + "'");
+            System.out.println("   - Tipo: '" + nuevoTipo + "'");
+            System.out.println("   - Fecha: " + nuevaFecha);
+            System.out.println("   - Descripción: '" + nuevaDescripcion + "'");
+            
             // Validar datos
             if (!validarDatosActividad(nuevoNombre, nuevaFecha, nuevoTipo, nuevaDescripcion)) {
                 return;
             }
             
-            // Eliminar la actividad antigua
-            gestorProyecto.eliminarActividadProyectoTemporal(nombreActividad);
+            // Crear una nueva actividad con los datos actualizados
+            Actividad actividadActualizada = new Actividad(nuevoNombre, nuevaDescripcion, 
+                    co.edu.uptc.model.TipoActividad.valueOf(nuevoTipo.toUpperCase()), nuevaFecha);
             
-            // Guardar la actividad actualizada
-            gestorProyecto.guardarActividadNuevoProyecto(nuevoNombre, nuevaFecha, nuevoTipo, nuevaDescripcion);
+            // Actualizar en el gestor pasando el nombre antiguo para encontrarla
+            gestorProyecto.actualizarActividadTemporal(nombreActividad, actividadActualizada);
             
-            System.out.println("[LOG] Presenter.editarActividadTemporal() - Actividad actualizada exitosamente");
+            System.out.println("[LOG] Presenter.editarActividadTemporal() - Actividad actualizada en memoria");
             vista.showMessage("Actividad actualizada exitosamente.");
             
             // Volver a la vista de actividades temporales
@@ -1210,6 +1228,7 @@ public class Presenter implements ActionListener{
             
         } catch (Exception e) {
             System.out.println("[ERROR] Presenter.editarActividadTemporal() - " + e.getMessage());
+            e.printStackTrace();
             vista.showErrorMessage("Error al actualizar actividad: " + e.getMessage());
         }
     }

@@ -629,4 +629,22 @@ public class Gestor {
         }
         return null;
     }
+
+    public void actualizarActividadTemporal(String nombreAntiguo, Actividad actividadActualizada) {
+        if (actividadActualizada == null) {
+            System.out.println("[ERROR] Gestor.actualizarActividadTemporal() - Actividad nula");
+            return;
+        }
+        
+        // Buscar la actividad en la lista temporal por el nombre antiguo y actualizar
+        for (int i = 0; i < actividadesProyectoTemporal.size(); i++) {
+            if (actividadesProyectoTemporal.get(i).getNombre().equalsIgnoreCase(nombreAntiguo)) {
+                actividadesProyectoTemporal.set(i, actividadActualizada);
+                System.out.println("[LOG] Gestor.actualizarActividadTemporal() - Actividad '" + nombreAntiguo + "' actualizada a '" + actividadActualizada.getNombre() + "' exitosamente");
+                return;
+            }
+        }
+        
+        System.out.println("[ERROR] Gestor.actualizarActividadTemporal() - Actividad '" + nombreAntiguo + "' no encontrada en el proyecto temporal");
+    }
 }

@@ -63,15 +63,16 @@ public class EditarActividad extends JPanel{
         this.instruccion = new Texto("<html> Puedes modificar la información de los campos, para guardar los cambios has click en el botón 'Guardar',  para eliminar el registro <br> has click en el botón 'Eliminar'</html>", TipoTexto.INSTRUCCION, "VERDE");
     }
     private void camposFormulario(){
+        System.out.println("[LOG] EditarActividad.camposFormulario() -" + datosActividad);
         this.campoNombre = new IngresarCampo(15);
         this.campoNombre.setText(datosActividad.get(0));
         this.campoFecha = new IngresarFecha(365);
-        setFechaDesdeString(this.campoFecha, this.datosActividad.get(1));
+        setFechaDesdeString(this.campoFecha, this.datosActividad.get(2));
         this.tipo = new CajaOpciones(tiposActividad, 330);
-        this.tipo.setSelectedItem(datosActividad.get(2));
+        this.tipo.setSelectedItem(datosActividad.get(3));
         this.descripcion = new AreaTexto(5, 22);
         this.descripcion.setPreferredSize(new Dimension(450, 200));
-        this.descripcion.setText(datosActividad.get(3));
+        this.descripcion.setText(datosActividad.get(1));
     }
     private void botones(){
         // Configurar comandos según el contexto (temporal o proyecto existente)
@@ -91,7 +92,7 @@ public class EditarActividad extends JPanel{
     private void setFechaDesdeString(IngresarFecha campo, String fechaStr) {
         if (fechaStr != null && !fechaStr.isEmpty()) {
             try {
-                SimpleDateFormat formato = new SimpleDateFormat("dd-MM-yyyy");
+                SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
                 Date fecha = formato.parse(fechaStr);
                 Calendar cal = Calendar.getInstance();
                 cal.setTime(fecha);
@@ -188,16 +189,22 @@ public class EditarActividad extends JPanel{
         if(listener == null) return;
         this.crearActividad.addActionListener(listener);
         this.cancelar.addActionListener(listener);
-        
+        this.eliminar.addActionListener(listener);
     }
 
     
     public String getNombreProyecto() {
+        // Nota: Este método devuelve el nombre de la ACTIVIDAD, no del proyecto
+        // Se mantiene el nombre por compatibilidad con VistaGestor
         return campoNombre.getText();
     }
+    
     public Date getFechaInicio() {
+        // Nota: Este método devuelve la fecha de la ACTIVIDAD
+        // Se mantiene el nombre por compatibilidad con VistaGestor
         return campoFecha.getFechaCalendar();
     }
+    
     public String getTipoActividad() {
         return tipo.getSelectedItem().toString();
     }

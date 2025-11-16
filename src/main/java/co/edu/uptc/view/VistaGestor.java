@@ -174,40 +174,44 @@ public class VistaGestor extends JFrame{
         return null;
     }
     
-    // Información de panel de crear actividad
+    // Información de panel de crear/editar actividad
+    // Prioriza panelEditarActividad si está disponible (para edición)
     public String getNombreActividad() {
-        if (panelCrearActividad != null) {
-            return panelCrearActividad.getNombreProyecto();
-        }
         if (panelEditarActividad != null) {
             return panelEditarActividad.getNombreProyecto();
         }
+        if (panelCrearActividad != null) {
+            return panelCrearActividad.getNombreProyecto();
+        }
         return null;
     }
+    
     public Date getFechaActividad() {
-        if (panelCrearActividad != null) {
-            return panelCrearActividad.getFechaInicio();
-        }
         if (panelEditarActividad != null) {
             return panelEditarActividad.getFechaInicio();
         }
+        if (panelCrearActividad != null) {
+            return panelCrearActividad.getFechaInicio();
+        }
         return null;
     }
+    
     public String getTipoActividad() {
-        if (panelCrearActividad != null) {
-            return panelCrearActividad.getTipoActividad();
-        }
         if (panelEditarActividad != null) {
             return panelEditarActividad.getTipoActividad();
         }
+        if (panelCrearActividad != null) {
+            return panelCrearActividad.getTipoActividad();
+        }
         return null;
     }
+    
     public String getDescripcionActividad() {
-        if (panelCrearActividad != null) {
-            return panelCrearActividad.getDescripcion();
-        }
         if (panelEditarActividad != null) {
             return panelEditarActividad.getDescripcion();
+        }
+        if (panelCrearActividad != null) {
+            return panelCrearActividad.getDescripcion();
         }
         return null;
     }
@@ -306,6 +310,11 @@ public class VistaGestor extends JFrame{
      * Muestra un JFileChooser para que el usuario seleccione la carpeta donde descargar un archivo
      * @return La ruta de la carpeta seleccionada, o null si se canceló la selección
      */
+    public void limpiarPanelEditarActividad() {
+        System.out.println("[LOG] VistaGestor.limpiarPanelEditarActividad() - Limpiando panel de editar actividad");
+        panelEditarActividad = null;
+    }
+
     public String seleccionarCarpetaDescarga() {
         System.out.println("[LOG] VistaGestor.seleccionarCarpetaDescarga() - Iniciando selección de carpeta");
         
