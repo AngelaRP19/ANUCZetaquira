@@ -2,20 +2,24 @@ package co.edu.uptc.view;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Date;
+import java.io.File;
+import java.util.Locale;
 
 import javax.swing.BorderFactory;
+import javax.swing.UIManager;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 
 public class SubirDocumento extends JPanel{
     
-     private final ColorConstante color = new ColorConstante();
+    private final ColorConstante color = new ColorConstante();
 
     private ActionListener listener;  
     private String [] tiposDocumento;
@@ -59,7 +63,7 @@ public class SubirDocumento extends JPanel{
     private void encabezados(){
         this.titulo = new Texto("Subir Documento", TipoTexto.TITULO, "VERDE");
         this.subtitulo = new Texto(nombreProyecto.toUpperCase() + ":  DOCUMENTOS. ", TipoTexto.NORMAL, "VERDE");
-        this.instruccion = new Texto("<html>  Por favor, llene los campos obligatorios * y seleccione el archivo a subir haciendo clic en el botón subir Archivo, luego guarde <br> el registro en el botón Guardar.</html>", TipoTexto.INSTRUCCION, "VERDE");
+        this.instruccion = new Texto("<html>  Por favor, llene los campos obligatorios * y seleccione el archivo a subir haciendo clic en el botón subir Archivo, luego guarde <br> el registro en el botón Guardar.<br> Tenga en cuenta que antes de seleccionar el archivo, debe seleccionar el tipo. Solo se puede subir un archivo a la vez.</html>", TipoTexto.INSTRUCCION, "VERDE");
     }
     private void camposFormulario(){
         this.nombreDoc = new IngresarCampo(13);
@@ -182,8 +186,26 @@ public class SubirDocumento extends JPanel{
 
     private void agregarActionListeners(){
         if(listener == null) return;
-        this.subirDocumento.addActionListener(listener);
-        this.limpiarArchivo.addActionListener(listener);
+        
+        // El botón de subir archivo se maneja directamente aquí
+        this.subirDocumento.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                seleccionarArchivoDirectamente();
+            }
+        });
+        
+        // El botón de limpiar archivo también se maneja directamente
+        this.limpiarArchivo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                limpiarArchivoSeleccionado();
+                rutaArchivoSeleccionado = null;
+                mostrarArchivoSubido(null);
+            }
+        });
+        
+        // Los demás botones siguen usando el listener del presenter
         this.guardar.addActionListener(listener);
         this.cancelar.addActionListener(listener);
     }
@@ -214,26 +236,116 @@ public class SubirDocumento extends JPanel{
     }
 
     public String seleccionarArchivo() {
-        java.io.File home = FileSystemView.getFileSystemView().getHomeDirectory();
-        JFileChooser chooser = new JFileChooser(home);
-        chooser.setDialogTitle("Selecciona el archivo a subir");
-        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        chooser.setAcceptAllFileFilterUsed(true);
-        chooser.setApproveButtonText("Seleccionar");
+        // Guardar textos originales para restaurar después
+        Object originalCancelText = UIManager.get("FileChooser.cancelButtonText");
+        Object originalOpenText = UIManager.get("FileChooser.openButtonText");
+        
+        try {
+            // Configurar textos personalizados en español
+            UIManager.put("FileChooser.cancelButtonText", "Cancelar");
+            UIManager.put("FileChooser.openButtonText", "Seleccionar");
+            UIManager.put("FileChooser.filesOfTypeLabelText", "Archivos de tipo:");
+            UIManager.put("FileChooser.fileNameLabelText", "Nombre del archivo:");
+            UIManager.put("FileChooser.lookInLabelText", "Buscar en:");
+            
+            java.io.File home = FileSystemView.getFileSystemView().getHomeDirectory();
+            JFileChooser chooser = new JFileChooser(home);
+            
+            chooser.setLocale(new Locale("es", "ES"));
+            chooser.setDialogTitle("Selecciona el archivo a subir");
+            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            chooser.setAcceptAllFileFilterUsed(true);
+            chooser.setApproveButtonText("Seleccionar");
+            
+            // Forzar actualización de la UI
+            chooser.updateUI();
 
-        int result = chooser.showOpenDialog(this);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            java.io.File archivo = chooser.getSelectedFile();
-            this.rutaArchivoSeleccionado = archivo.getAbsolutePath();
-            return archivo != null ? archivo.getAbsolutePath() : null;
+            int result = chooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                java.io.File archivo = chooser.getSelectedFile();
+                this.rutaArchivoSeleccionado = archivo.getAbsolutePath();
+                return archivo.getAbsolutePath();
+            }
+            return null;
+        } finally {
+            // Restaurar textos originales
+            if (originalCancelText != null) {
+                UIManager.put("FileChooser.cancelButtonText", originalCancelText);
+            }
+            if (originalOpenText != null) {
+                UIManager.put("FileChooser.openButtonText", originalOpenText);
+            }
         }
-        return null;
     }
     
     /**
-     * Limpia el archivo seleccionado, restaurando el panel al estado inicial.
-     * Llama internamente a mostrarArchivoSubido(null).
+     * Método mejorado para seleccionar archivo con filtros y mejor UX
      */
+    private void seleccionarArchivoDirectamente() {
+        System.out.println("[LOG] SubirDocumento.seleccionarArchivoDirectamente() - Iniciando diálogo de selección");
+        
+        // Guardar textos originales para restaurar después
+        Object originalCancelText = UIManager.get("FileChooser.cancelButtonText");
+        Object originalOpenText = UIManager.get("FileChooser.openButtonText");
+        
+        try {
+            // Configurar textos personalizados en español
+            UIManager.put("FileChooser.cancelButtonText", "Cancelar");
+            UIManager.put("FileChooser.openButtonText", "Seleccionar");
+            UIManager.put("FileChooser.filesOfTypeLabelText", "Archivos de tipo:");
+            UIManager.put("FileChooser.fileNameLabelText", "Nombre del archivo:");
+            UIManager.put("FileChooser.lookInLabelText", "Buscar en:");
+            
+            JFileChooser fileChooser = new JFileChooser();
+            
+            fileChooser.setLocale(new Locale("es", "ES"));
+            fileChooser.setDialogTitle("Seleccionar archivo para subir");
+            fileChooser.setApproveButtonText("Seleccionar");
+            
+            // Filtros para tipos de archivo comunes
+            FileNameExtensionFilter filterPDF = new FileNameExtensionFilter("Documentos PDF (*.pdf)", "pdf");
+            FileNameExtensionFilter filterDOC = new FileNameExtensionFilter("Documentos Word (*.doc, *.docx)", "doc", "docx");
+            FileNameExtensionFilter filterIMG = new FileNameExtensionFilter("Imágenes (*.jpg, *.png, *.jpeg)", "jpg", "png", "jpeg");
+            FileNameExtensionFilter filterALL = new FileNameExtensionFilter("Todos los archivos", "*");
+            
+            fileChooser.addChoosableFileFilter(filterPDF);
+            fileChooser.addChoosableFileFilter(filterDOC);
+            fileChooser.addChoosableFileFilter(filterIMG);
+            fileChooser.setFileFilter(filterALL);
+            
+            // Forzar actualización de la UI
+            fileChooser.updateUI();
+            
+            int resultado = fileChooser.showOpenDialog(this);
+            
+            if (resultado == JFileChooser.APPROVE_OPTION) {
+                File archivoSeleccionado = fileChooser.getSelectedFile();
+                String rutaArchivo = archivoSeleccionado.getAbsolutePath();
+                String nombreArchivo = archivoSeleccionado.getName();
+                
+                System.out.println("[LOG] SubirDocumento.seleccionarArchivoDirectamente() - Archivo seleccionado: " + nombreArchivo);
+                System.out.println("[LOG] SubirDocumento.seleccionarArchivoDirectamente() - Ruta: " + rutaArchivo);
+                
+                // Actualizar el estado interno
+                this.rutaArchivoSeleccionado = rutaArchivo;
+                
+                // Actualizar la UI para mostrar el archivo seleccionado
+                mostrarArchivoSubido(nombreArchivo);
+            } else {
+                System.out.println("[LOG] SubirDocumento.seleccionarArchivoDirectamente() - Selección cancelada");
+            }
+        } finally {
+            // Restaurar textos originales
+            if (originalCancelText != null) {
+                UIManager.put("FileChooser.cancelButtonText", originalCancelText);
+            }
+            if (originalOpenText != null) {
+                UIManager.put("FileChooser.openButtonText", originalOpenText);
+            }
+        }
+    }
+    
+   
     public void limpiarArchivoSeleccionado() {
         mostrarArchivoSubido(null);
     }

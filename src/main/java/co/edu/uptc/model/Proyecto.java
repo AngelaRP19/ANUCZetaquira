@@ -7,11 +7,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import co.edu.uptc.dao.DocumentoDAO;
-
-import java.util.Iterator;
 
 public class Proyecto {
 
@@ -129,7 +128,8 @@ public class Proyecto {
         this.documentos.addAll(documentosBD);
     }
 
-    public void registrarDocumento(String nombre, String tipo, String rutaArchivo) {
+    public Documento registrarDocumento(String nombre, String tipo, String rutaArchivo) {
+        Documento documento = null;
         try {
             byte[] archivoBytes = Files.readAllBytes(Path.of(rutaArchivo));
             TipoDocumento tipoDoc = TipoDocumento.valueOf(tipo.toUpperCase());
@@ -140,16 +140,17 @@ public class Proyecto {
                 extension = rutaArchivo.substring(puntoIndex + 1);
             }
 
-            Documento documento = new Documento(nombre, tipoDoc, archivoBytes, extension);
+            documento = new Documento(nombre, tipoDoc, archivoBytes, extension);
             documentos.add(documento);
 
             System.out.println("Documento '" + nombre + "' agregado en memoria con extensión ." + extension);
-
+            
         } catch (IllegalArgumentException e) {
             System.err.println("Tipo de documento inválido: " + tipo);
         } catch (IOException e) {
             System.err.println("Error al leer el archivo: " + e.getMessage());
         }
+        return documento;
     }
 
     public List<String> obtenerNombresDocumentosProyecto() {
@@ -198,6 +199,10 @@ public class Proyecto {
 
         System.out.println("El documento '" + nombreDocumento + "' no existe en memoria.");
         return false;
+    }
+
+    public void agregarDocumento(Documento documento) {
+        this.documentos.add(documento);
     }
 
     public int getIdentificador() {

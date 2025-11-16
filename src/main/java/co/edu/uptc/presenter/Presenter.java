@@ -2,18 +2,13 @@ package co.edu.uptc.presenter;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.text.SimpleDateFormat;
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import java.io.File;
 
-import javax.swing.JFrame;
-
-import co.edu.uptc.model.Proyecto;
 import co.edu.uptc.model.Actividad;
 import co.edu.uptc.model.Gestor;
+import co.edu.uptc.model.Proyecto;
 import co.edu.uptc.view.VistaGestor;
 
 public class Presenter implements ActionListener{
@@ -24,92 +19,111 @@ public class Presenter implements ActionListener{
     // Estado actual de navegación
     private String proyectoActual;
     private String actividadActual;
-
+    String[] tiposDocumento;
+    
     public Presenter() {
         this.gestorProyecto = new Gestor();
-        // NO cargar todo de una vez - cargar bajo demanda
         this.vista = new VistaGestor(this);
         this.proyectoActual = null;
         this.actividadActual = null;
+        this.tiposDocumento = new String[] {"ACTA", "PROPUESTA", "INFORMES", "SOPORTE_FINANCIERO", "MATERIAL_TECNICO"};
     }
-
+/*
     public void cargarTodoDesdeBD() {
         gestorProyecto.cargarTodoDesdeBD();
     }
-
+*/
     public List<Proyecto> getProyectos() {
        return gestorProyecto.getProyectos();
     }
 
-    /**
-     * Elimina proyectos con nombres inválidos: vacío, "x" o "aaaaa" (ignorando mayúsculas/minúsculas).
-     * Retorna la cantidad de proyectos eliminados.
-     */
-    public int eliminarProyectosInvalidos() {
-        List<Proyecto> actuales = gestorProyecto.getProyectos();
-        // Copia defensiva de los nombres para evitar ConcurrentModification
-        java.util.ArrayList<String> nombres = new java.util.ArrayList<>();
-        for (Proyecto p : actuales) {
-            nombres.add(p.getNombre());
-        }
-
-        int eliminados = 0;
-        for (String nombre : nombres) {
-            String n = (nombre == null) ? "" : nombre.trim();
-            if (n.isEmpty() || n.equalsIgnoreCase("x") || n.equalsIgnoreCase("aaaaa")) {
-                gestorProyecto.eliminarProyectoConDependencias(nombre);
-                eliminados++;
-            }
-        }
-        return eliminados;
-    }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        String comando = e.getActionCommand();
+        String comando = e.getActionCommand().toUpperCase();
         System.out.println("[LOG] Presenter.actionPerformed() - Comando recibido: " + comando);
-        
-        // Menú Principal
-        if (comando.equals("MINIMIZAR")) {
-            System.out.println("[LOG] Presenter - Minimizando ventana");
-            vista.setExtendedState(JFrame.ICONIFIED);
-        } 
-        else if (comando.equals("CERRAR")) {
-            System.out.println("[LOG] Presenter - Cerrando aplicación");
-            System.exit(0);
-        } 
-        else if (comando.equals("CREAR_PROYECTO")) {
-            System.out.println("[LOG] Presenter - Ir a crear proyecto");
-            crearProyecto();
-        } 
-        else if (comando.equals("VER_PROYECTOS")) {
-            System.out.println("[LOG] Presenter - Ir a ver proyectos");
-            verProyectos();
-        } 
-        else if (comando.equals("MANUAL_USUARIO")) {
-            System.out.println("[LOG] Presenter - Descargar manual de usuario");
-            vista.descargarManualUsuario();
-        } 
-        else if (comando.equals("VOLVER_BIENVENIDA")) {
-            System.out.println("[LOG] Presenter - Volver a bienvenida");
-            vista.bienvenida();
+        switch (comando) {
+            case "MINIMIZAR":
+                System.out.println("[LOG] Presenter - Minimizando ventana");
+                vista.minimizarVentana();
+                break;
+            case "CERRAR":
+                System.out.println("[LOG] Presenter - Cerrando aplicación");
+                System.exit(0);
+                break;
+            case "CREAR_PROYECTO":
+                System.out.println("[LOG] Presenter - Ir a crear proyecto");
+                crearProyecto();
+                break;
+            case "VER_PROYECTOS":
+                System.out.println("[LOG] Presenter - Ir a ver proyectos");
+                verProyectos();
+                break;
+            case "MANUAL_USUARIO":
+                System.out.println("[LOG] Presenter - Descargar manual de usuario");
+                vista.descargarManualUsuario();
+                break;
+            case "VOLVER_BIENVENIDA":
+                System.out.println("[LOG] Presenter - Volver a bienvenida");
+                vista.bienvenida();
+                break;
+            case "PANEL_SUBIR_DOCUMENTO_NUEVO_PROYECTO":
+                System.out.println("[LOG] Presenter - Ir a subir documento del proyecto que se está creando.");
+                subirDocumentoNuevoProyeto();
+                break;
+            case "GUARDAR_DOCUMENTO/NUEVO_PROYECTO":
+                System.out.println("[LOG] Presenter - Guardar documento de nuevo proyecto");
+                guardarDocumentoNuevoProyecto();
+                break;
+            case "PANEL_VER_DOCUMENTOS_NUEVO_PROYECTO":
+                System.out.println("[LOG] Presenter - Ver documentos del proyecto que se está creando.");
+                verDocumentosNuevoProyecto();
+                break;
+            case "CANCELAR_BUSQUEDA_PROYECTO":
+                System.out.println("[LOG] Presenter - Cancelar búsqueda de proyectos y mostrar todos.");
+                vista.bienvenida();
+                break;
+            case "VOLVER_VER_PROYECTO/NUEVO_PROYECTO":
+                System.out.println("[LOG] Presenter - Volver a ver proyecto que se está creando.");
+                volverACrearProyecto();
+                break;
+            case "GUARDAR_PROYECTO":
+                guardarProyecto();
+                break;
+            case "GUARDAR_CAMBIOS":
+                guardarProyecto();
+                break;
+            case "CANCELAR":
+                cancelar();
+                break;
         }
-        
-        // Ver Proyecto (desde lista)
-        else if (comando.startsWith("VER_PROYECTO/")) {
+        if (comando.startsWith("DESCARGAR_DOCUMENTO/")) {
+            String[] partes = comando.substring("DESCARGAR_DOCUMENTO/".length()).split("/");
+            if(partes[1].equals("NUEVO_PROYECTO")){
+                System.out.println("entraaa");
+                descargarDocumentoTemp(partes[0]);
+            }else{
+                if (partes.length >= 2) {
+                descargarDocumento(partes[0], partes[1]);
+            }
+            }
+        }
+        else if (comando.startsWith("ELIMINAR_DOCUMENTO/")) {
+            String[] partes = comando.substring("ELIMINAR_DOCUMENTO/".length()).split("/");
+            if(partes[1].equals("NUEVO_PROYECTO")){
+                gestorProyecto.eliminarDocumentoProyectoTemporal(partes[0]);
+                vista.showMessage("Documento eliminado");
+                verDocumentosNuevoProyecto();
+            }else{
+                if (partes.length >= 2) {
+                eliminarDocumento(partes[0], partes[1]);
+            }
+            }
+        }else if (comando.startsWith("VER_PROYECTO/")) {
             String nombre = comando.substring("VER_PROYECTO/".length());
             verProyecto(nombre);
         }
-        
-        // Guardar Proyecto (crear o editar)
-        else if (comando.equals("GUARDAR_PROYECTO") || comando.equals("CREAR_PROYECTO")) {
-            guardarProyecto();
-        }
-        
-        // Editar Proyecto
-        else if (comando.equals("GUARDAR_CAMBIOS")) {
-            guardarProyecto();
-        }
+       
         else if (comando.equals("GUARDAR_ACTIVIDAD")) {
             guardarActividad();
         }
@@ -123,13 +137,6 @@ public class Presenter implements ActionListener{
                 eliminarProyecto();
             }
         }
-        
-        // Cancelar (volver atrás)
-        else if (comando.equals("CANCELAR")) {
-            cancelar();
-        }
-        
-        // Actividades
         else if (comando.equals("REGISTRAR_ACTIVIDAD")) {
             crearActividad();
         }
@@ -173,18 +180,7 @@ public class Presenter implements ActionListener{
         else if (comando.equals("VER_DOCUMENTOS")) {
             verDocumentos();
         }
-        else if (comando.startsWith("DESCARGAR_DOCUMENTO/")) {
-            String[] partes = comando.substring("DESCARGAR_DOCUMENTO/".length()).split("/");
-            if (partes.length >= 2) {
-                descargarDocumento(partes[0], partes[1]);
-            }
-        }
-        else if (comando.startsWith("ELIMINAR_DOCUMENTO/")) {
-            String[] partes = comando.substring("ELIMINAR_DOCUMENTO/".length()).split("/");
-            if (partes.length >= 2) {
-                eliminarDocumento(partes[0], partes[1]);
-            }
-        }
+
         else if (comando.equals("GUARDAR_DOCUMENTO")) {
             guardarDocumento();
         }
@@ -194,11 +190,8 @@ public class Presenter implements ActionListener{
                 guardarDocumento();
             }
         }
-        else if (comando.startsWith("SUBIR_ARCHIVO/")) {
-            seleccionarArchivo();
-        }
         else if (comando.startsWith("LIMPIAR_ARCHIVO")) {
-            // Manejado por la vista
+            // Manejado directamente por la vista SubirDocumento
         }
         
         // Comandos adicionales que faltaban
@@ -260,6 +253,83 @@ public class Presenter implements ActionListener{
         }
         else {
             System.out.println("[LOG] Presenter - Comando no reconocido: " + comando);
+        }
+    }
+    private void guardarProyectoTemporal(){
+        System.out.println("[LOG] Presenter.subirDocumentoNuevoProyeto() - Yendo a subir documento de nuevo proyecto");
+        String nombreTemp = vista.getNombreProyecto();
+        Date fechaInicioTemp = vista.getFechaInicioProyecto();
+        Date fechaFinTemp = vista.getFechaFinProyecto();
+        String estadoTemp = vista.getEstadoProyecto();
+        String descripcionTemp = vista.getDescripcionProyecto();
+        gestorProyecto.guardarProyectoTemporal(nombreTemp, fechaInicioTemp, fechaFinTemp, estadoTemp, descripcionTemp);
+    }
+    private void subirDocumentoNuevoProyeto() {
+        this.guardarProyectoTemporal();
+        vista.subirDocumento(tiposDocumento, "NUEVO_PROYECTO");
+        //gestorProyecto.subirDocumentoNuevoProyecto();
+        System.out.println("[LOG] Presenter.subirDocumentoNuevoProyeto() - Completado");
+    }
+    private void guardarDocumentoNuevoProyecto() {
+        System.out.println("[LOG] Presenter.guardarDocumentoNuevoProyecto() - Iniciando guardado");
+        
+        try {
+            String nombreDocumento = vista.getNombreDocumento();
+            String tipoDocumento = vista.getTipoDocumento();
+            String rutaArchivo = vista.getRutaArchivoDocumento();
+            
+            validarDatosDocumento(nombreDocumento, tipoDocumento, rutaArchivo);
+            gestorProyecto.guardarDocumentoNuevoProyecto(nombreDocumento, tipoDocumento, rutaArchivo);
+            
+            System.out.println("[LOG] Presenter.guardarDocumentoNuevoProyecto() - Documento guardado exitosamente");
+            vista.showMessage("Documento guardado exitosamente.");
+            volverACrearProyecto();
+            
+        } catch (IllegalArgumentException e) {
+            System.err.println("[ERROR] Presenter.guardarDocumentoNuevoProyecto() - Error de validación: " + e.getMessage());
+            // El mensaje ya se mostró en la validación
+        } catch (Exception e) {
+            System.err.println("[ERROR] Presenter.guardarDocumentoNuevoProyecto() - Error inesperado: " + e.getMessage());
+            vista.showErrorMessage("Error inesperado al guardar el documento: " + e.getMessage());
+        }
+    }
+    private void volverACrearProyecto() {
+        System.out.println("[LOG] Presenter.volverACrearProyecto() - Volviendo a crear proyecto");
+        vista.crearProyecto();
+        vista.setNombreProyecto(gestorProyecto.getProyectoTemporal().getNombre());
+        vista.setFechaInicioProyecto(gestorProyecto.getProyectoTemporal().getFechaInicio());
+        vista.setFechaFinProyecto(gestorProyecto.getProyectoTemporal().getFechaFin());
+        vista.setEstadoProyecto(gestorProyecto.getProyectoTemporal().getEstado().toString());
+        vista.setDescripcionProyecto(gestorProyecto.getProyectoTemporal().getDescripcion());
+        System.out.println("[LOG] Presenter.volverACrearProyecto() - Completado");
+    }
+    private void verDocumentosNuevoProyecto() {
+        System.out.println("[LOG] Presenter.verDocumentosNuevoProyecto() - Iniciando");
+        this.guardarProyectoTemporal();
+        List<String> nombresDocumentos = gestorProyecto.getNombresDocumentosProyectoTemporal();
+        System.out.println("[LOG] Presenter.verDocumentosNuevoProyecto() - Encontrados " + nombresDocumentos.size() + " documentos");
+        vista.verDocumentos(nombresDocumentos, "NUEVO_PROYECTO");
+        System.out.println("[LOG] Presenter.verDocumentosNuevoProyecto() - Completado");
+    }
+    private void descargarDocumentoTemp(String nombreDocumento) {
+        System.out.println("[LOG] Presenter.descargarDocumentoTemp() - Iniciando descarga: " + nombreDocumento);
+        
+        // Permitir al usuario seleccionar carpeta de descarga
+        String rutaDestino = vista.seleccionarCarpetaDescarga();
+        if (rutaDestino == null) {
+            System.out.println("[LOG] Presenter.descargarDocumentoTemp() - Descarga cancelada por el usuario");
+            return;
+        }
+        
+        System.out.println("[LOG] Presenter.descargarDocumentoTemp() - Carpeta seleccionada: " + rutaDestino);
+        
+        try {
+            gestorProyecto.descargarDocumentoTemp(nombreDocumento, rutaDestino);
+            vista.showMessage("Documento descargado exitosamente en: " + rutaDestino);
+            System.out.println("[LOG] Presenter.descargarDocumentoTemp() - Completado exitosamente");
+        } catch (Exception e) {
+            System.err.println("[ERROR] Presenter.descargarDocumentoTemp() - Error al descargar: " + e.getMessage());
+            vista.showErrorMessage("Error al descargar el documento: " + e.getMessage());
         }
     }
     private void guardarProyecto() {
@@ -696,13 +766,8 @@ public class Presenter implements ActionListener{
     
     private void subirDocumento() {
         System.out.println("[LOG] Presenter.subirDocumento() - Iniciando para proyecto: " + proyectoActual);
-        if (proyectoActual == null) {
-            System.out.println("[LOG] Presenter.subirDocumento() - ERROR: No hay proyecto seleccionado");
-            vista.showErrorMessage("No hay proyecto seleccionado");
-            return;
-        }
+
         
-        String[] tiposDocumento = {"ACTA", "PROPUESTA", "INFORMES", "SOPORTE_FINANCIERO", "MATERIAL_TECNICO"};
         System.out.println("[LOG] Presenter.subirDocumento() - Mostrando formulario subir documento");
         vista.subirDocumento(tiposDocumento, proyectoActual);
         System.out.println("[LOG] Presenter.subirDocumento() - Completado");
@@ -721,9 +786,9 @@ public class Presenter implements ActionListener{
         vista.verDocumentos(documentos, proyectoActual);
         System.out.println("[LOG] Presenter.verDocumentos() - Completado");
     }
-    
+    //se debe escoger la ruta
     private void descargarDocumento(String nombreDocumento, String nombreProyecto) {
-        String rutaDestino = new java.io.File(System.getProperty("user.home") + "/Downloads").getAbsolutePath();
+        String rutaDestino = vista.seleccionarCarpetaDescarga();
         gestorProyecto.descargarDocumento(nombreProyecto, nombreDocumento, rutaDestino);
         vista.showMessage("Documento descargado exitosamente en: " + rutaDestino);
     }
@@ -757,18 +822,7 @@ public class Presenter implements ActionListener{
         String rutaArchivo = vista.getRutaArchivoDocumento();
         
         // Validaciones
-        if (nombre == null || nombre.isEmpty()) {
-            vista.showErrorMessage("El nombre del documento es obligatorio.");
-            return;
-        }
-        if (tipo == null || tipo.isEmpty()) {
-            vista.showErrorMessage("El tipo de documento es obligatorio.");
-            return;
-        }
-        if (rutaArchivo == null || rutaArchivo.isEmpty()) {
-            vista.showErrorMessage("Debe seleccionar un archivo.");
-            return;
-        }
+        validarDatosDocumento(nombre, tipo, rutaArchivo);
         
         // Registrar documento
         System.out.println("[LOG] Presenter.guardarDocumento() - Registrando documento:");
@@ -781,40 +835,36 @@ public class Presenter implements ActionListener{
         vista.showMessage("Documento guardado exitosamente.");
         vista.bienvenida();
     }
-    
-    private void seleccionarArchivo() {
-        System.out.println("[LOG] Presenter.seleccionarArchivo() - Iniciando diálogo de selección");
+    private void validarDatosDocumento(String nombre, String tipo, String rutaArchivo) {
+        System.out.println("[LOG] Presenter.validarDatosDocumento() - Validando: nombre='" + nombre + "', tipo='" + tipo + "', ruta='" + rutaArchivo + "'");
         
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Seleccionar archivo para subir");
-        
-        // Filtros para tipos de archivo comunes
-        FileNameExtensionFilter filterPDF = new FileNameExtensionFilter("Documentos PDF (*.pdf)", "pdf");
-        FileNameExtensionFilter filterDOC = new FileNameExtensionFilter("Documentos Word (*.doc, *.docx)", "doc", "docx");
-        FileNameExtensionFilter filterIMG = new FileNameExtensionFilter("Imágenes (*.jpg, *.png, *.jpeg)", "jpg", "png", "jpeg");
-        FileNameExtensionFilter filterALL = new FileNameExtensionFilter("Todos los archivos", "*");
-        
-        fileChooser.addChoosableFileFilter(filterPDF);
-        fileChooser.addChoosableFileFilter(filterDOC);
-        fileChooser.addChoosableFileFilter(filterIMG);
-        fileChooser.setFileFilter(filterALL);
-        
-        int resultado = fileChooser.showOpenDialog(null);
-        
-        if (resultado == JFileChooser.APPROVE_OPTION) {
-            File archivoSeleccionado = fileChooser.getSelectedFile();
-            String rutaArchivo = archivoSeleccionado.getAbsolutePath();
-            String nombreArchivo = archivoSeleccionado.getName();
-            
-            System.out.println("[LOG] Presenter.seleccionarArchivo() - Archivo seleccionado: " + nombreArchivo);
-            System.out.println("[LOG] Presenter.seleccionarArchivo() - Ruta: " + rutaArchivo);
-            
-            // Notificar a la vista que se seleccionó un archivo
-            vista.setArchivoSeleccionado(rutaArchivo, nombreArchivo);
-        } else {
-            System.out.println("[LOG] Presenter.seleccionarArchivo() - Selección cancelada");
+        if (nombre == null || nombre.trim().isEmpty()) {
+            System.out.println("[ERROR] Presenter.validarDatosDocumento() - Nombre vacío");
+            vista.showErrorMessage("El nombre del documento es obligatorio.");
+            throw new IllegalArgumentException("El nombre del documento es obligatorio.");
         }
+        if (tipo == null || tipo.trim().isEmpty()) {
+            System.out.println("[ERROR] Presenter.validarDatosDocumento() - Tipo vacío");
+            vista.showErrorMessage("El tipo de documento es obligatorio.");
+            throw new IllegalArgumentException("El tipo de documento es obligatorio.");
+        }
+        if (rutaArchivo == null || rutaArchivo.trim().isEmpty()) {
+            System.out.println("[ERROR] Presenter.validarDatosDocumento() - Ruta de archivo vacía");
+            vista.showErrorMessage("Debe seleccionar un archivo.");
+            throw new IllegalArgumentException("Debe seleccionar un archivo.");
+        }
+        
+        // Verificar que el archivo existe
+        java.io.File archivo = new java.io.File(rutaArchivo);
+        if (!archivo.exists()) {
+            System.out.println("[ERROR] Presenter.validarDatosDocumento() - Archivo no existe: " + rutaArchivo);
+            vista.showErrorMessage("El archivo seleccionado no existe.");
+            throw new IllegalArgumentException("El archivo seleccionado no existe.");
+        }
+        
+        System.out.println("[LOG] Presenter.validarDatosDocumento() - Validación exitosa");
     }
+
     
     private void buscarProyectos() {
         System.out.println("[LOG] Presenter.buscarProyectos() - Iniciando búsqueda");
@@ -926,4 +976,6 @@ public class Presenter implements ActionListener{
             vista.showInfoMessage("No se encontraron documentos que contengan: '" + textoBusqueda + "'");
         }
     }
+
+
 }

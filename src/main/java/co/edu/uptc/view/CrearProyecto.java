@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
+import java.util.Calendar;
 import java.util.Date;
 
 import javax.swing.BorderFactory;
@@ -65,10 +66,10 @@ public class CrearProyecto extends JPanel{
     private void botones(){
         this.crearProyecto = new Boton("Guardar", 160, 40, "GUARDAR_PROYECTO", 15, color.getVerdeClaro());
         this.cancelar = new Boton("Cancelar", 160, 40, "VOLVER_BIENVENIDA", 15, color.getVerdeOscuro());
-        this.subirDocumento = new Boton("Subir documento", 250, 40, "PANEL_SUBIR_DOCUMENTO", 15, color.getVerdeOpciones());
-        this.verDocumentos = new Boton("Ver documentos", 250, 40, "PANEL_VER_DOCUMENTOS", 15, color.getVerdeOpciones());
-        this.registrarActividad = new Boton("Crear Actividad", 250, 40, "PANEL_REGISTRAR_ACTIVIDAD", 15, color.getVerdeOpciones());
-        this.verActividades = new Boton("Ver Actividades", 250, 40, "PANEL_VER_ACTIVIDADES", 15, color.getVerdeOpciones());
+        this.subirDocumento = new Boton("Subir documento", 250, 40, "PANEL_SUBIR_DOCUMENTO_NUEVO_PROYECTO", 15, color.getVerdeOpciones());
+        this.verDocumentos = new Boton("Ver documentos", 250, 40, "PANEL_VER_DOCUMENTOS_NUEVO_PROYECTO", 15, color.getVerdeOpciones());
+        this.registrarActividad = new Boton("Crear Actividad", 250, 40, "PANEL_REGISTRAR_ACTIVIDAD_NUEVO_PROYECTO", 15, color.getVerdeOpciones());
+        this.verActividades = new Boton("Ver Actividades", 250, 40, "PANEL_VER_ACTIVIDADES_NUEVO_PROYECTO", 15, color.getVerdeOpciones());
     }
 
     private void ubicarComponentes(){
@@ -201,5 +202,50 @@ public class CrearProyecto extends JPanel{
     }
     public String getDescripcion() {
         return descripcion.getText();
+    }
+    
+    // Métodos para establecer valores (para datos temporales)
+    public void setNombreProyecto(String nombre) {
+        if (nombre != null) {
+            campoNombre.setText(nombre);
+        }
+    }
+    
+    public void setFechaInicio(Date fecha) {
+        if (fecha != null) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(fecha);
+            campoFechaInicio.setFecha(cal);
+        }
+    }
+    
+    public void setFechaFin(Date fecha) {
+        if (fecha != null) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(fecha);
+            campoFechaFin.setFecha(cal);
+        }
+    }
+    
+    public void setEstado(String estadoTexto) {
+        if (estadoTexto != null) {
+            estado.setSelectedItem(estadoTexto);
+        }
+    }
+    
+    public void setDescripcion(String desc) {
+        if (desc != null) {
+            descripcion.setText(desc);
+        }
+    }
+    
+    // Método para cargar todos los datos temporales
+    public void cargarDatosTemporales(String nombre, Date fechaInicio, Date fechaFin, String estado, String descripcion) {
+        setNombreProyecto(nombre);
+        setFechaInicio(fechaInicio);
+        setFechaFin(fechaFin);
+        setEstado(estado);
+        setDescripcion(descripcion);
+        System.out.println("[LOG] CrearProyecto.cargarDatosTemporales() - Datos temporales cargados en el formulario");
     }
 }

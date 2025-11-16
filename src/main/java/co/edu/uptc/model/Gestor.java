@@ -4,16 +4,20 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import co.edu.uptc.dao.ProyectoDAO;
 import co.edu.uptc.dao.ActividadDAO;
 import co.edu.uptc.dao.DocumentoDAO;
+import co.edu.uptc.dao.ProyectoDAO;
 
 public class Gestor {
 
     private List<Proyecto> proyectos;
+    private Proyecto proyectoTemporal;
+    private List<Documento> documentosProyectoTemporal;
 
     public Gestor() {
         this.proyectos = new ArrayList<>();
+        this.documentosProyectoTemporal = new ArrayList<>();
+
     }
 
     public void cargarTodoDesdeBD() {
@@ -35,25 +39,34 @@ public class Gestor {
                 + proyectos.size() + " proyectos con sus actividades y documentos).");
     }
 
-    public boolean  agregarProyecto(String nombre, Date fechaInicio, Date fechaFin, String estado, String descripcion) {
+    public boolean agregarProyecto(String nombre, Date fechaInicio, Date fechaFin, String estado, String descripcion) {
         if (!proyectoExiste(nombre)) {
             EstadoProyecto estadoP = EstadoProyecto.valueOf(estado.toUpperCase());
             if (fechaFin != null) {
                 Proyecto proyecto = new Proyecto(nombre, descripcion, fechaInicio, fechaFin, estadoP);
+                for (Documento doc : documentosProyectoTemporal) {
+                    proyecto.agregarDocumento(doc);
+                }
                 proyectos.add(proyecto);
                 System.out.println("Proyecto agregado exitosamente.");
                 registrarProyectoBD(proyecto);
                 System.out.println("Proyecto agregado exitosamente a la bd.");
+                 this.documentosProyectoTemporal = new ArrayList<>();
                 return true;
             } else {
                 Proyecto proyecto = new Proyecto(nombre, descripcion, fechaInicio, estadoP);
+                for (Documento doc : documentosProyectoTemporal) {
+                    proyecto.agregarDocumento(doc);
+                }
                 proyectos.add(proyecto);
                 System.out.println("Proyecto agregado exitosamente.");
                 registrarProyectoBD(proyecto);
                 System.out.println("Proyecto agregado exitosamente a la bd.");
+                 this.documentosProyectoTemporal = new ArrayList<>();
                 return true;
             }
-        }else{
+        } else {
+            this.documentosProyectoTemporal = new ArrayList<>();
             return false;
         }
     }
@@ -424,5 +437,108 @@ public class Gestor {
             nombres.add(p.getNombre());
         }
         return nombres;
+    }
+
+    public void guardarProyectoTemporal(String nombre, Date fechaInicio, Date fechaFin, String estado, String descripcion) {
+        EstadoProyecto estadoP = EstadoProyecto.valueOf(estado.toUpperCase());
+        proyectoTemporal = new Proyecto(nombre, descripcion, fechaInicio, fechaFin, estadoP);
+        
+        System.out.println("[LOG] Gestor.guardarProyectoTemporal() - Proyecto temporal guardado.");
+    }
+    public List<String> getDatosTemporales() {
+        List<String> datos = new ArrayList<>();
+        if (proyectoTemporal != null) {
+            datos.add(proyectoTemporal.getNombre());
+            datos.add(proyectoTemporal.getFechaInicio().toString());
+            datos.add(proyectoTemporal.getFechaFin() != null ? proyectoTemporal.getFechaFin().toString() : "null");
+            datos.add(proyectoTemporal.getEstado().toString());
+            datos.add(proyectoTemporal.getDescripcion());
+            System.out.println("[LOG] Gestor.getDatosTemporales() - Datos temporales obtenidos.");
+        } else {
+            System.out.println("[LOG] Gestor.getDatosTemporales() - No hay proyecto temporal guardado.");
+        }
+        return datos;
+    }
+    public void guardarDocumentoNuevoProyecto(String nombreDocumento, String tipoDocumento, String rutaArchivo) {
+        System.out.println("[LOG] Gestor.guardarDocumentoNuevoProyecto() - Parámetros: nombre='" + nombreDocumento + "', tipo='" + tipoDocumento + "', ruta='" + rutaArchivo + "'");
+        
+        Documento docCreado = proyectoTemporal.registrarDocumento(nombreDocumento, tipoDocumento, rutaArchivo);
+        if (docCreado != null) {
+            documentosProyectoTemporal.add(docCreado);
+            System.out.println("[LOG] Gestor.guardarDocumentoNuevoProyecto() - Documento '" + nombreDocumento + "' agregado exitosamente. Total documentos temporales: " + documentosProyectoTemporal.size());
+        } else {
+            System.out.println("[ERROR] Gestor.guardarDocumentoNuevoProyecto() - No se pudo crear el documento");
+        }
+    }
+    public List<String> getNombresDocumentosProyectoTemporal() {
+        System.out.println("[LOG] Gestor.getNombresDocumentosProyectoTemporal() - Total documentos: " + documentosProyectoTemporal.size());
+        List<String> nombres = new ArrayList<>();
+        for (Documento doc : this.documentosProyectoTemporal) {
+            System.out.println("[LOG] Gestor.getNombresDocumentosProyectoTemporal() - Documento: '" + doc.getNombre() + "', Extensión: '" + doc.getExtension() + "'");
+            nombres.add(doc.getNombre());
+        }
+        return nombres;
+    }
+    public Proyecto getProyectoTemporal() {
+        return proyectoTemporal;
+    }
+
+    public void eliminarDocumentoProyectoTemporal(String nombre) {
+        for (int i = 0; i < documentosProyectoTemporal.size(); i++) {
+            if (documentosProyectoTemporal.get(i).getNombre().equals(nombre)) {
+                documentosProyectoTemporal.remove(i);
+                System.out.println("[LOG] Gestor.eliminarDocumentoProyectoTemporal() - Documento '" + nombre + "' eliminado del proyecto temporal.");
+                return;
+            }
+        }
+        System.out.println("[LOG] Gestor.eliminarDocumentoProyectoTemporal() - Documento '" + nombre + "' no encontrado en el proyecto temporal.");
+    }
+
+    public void descargarDocumentoTemp(String nombreDocumento, String rutaDestino) throws Exception {
+        System.out.println("[LOG] Gestor.descargarDocumentoTemp() - Buscando documento: " + nombreDocumento);
+        System.out.println("[LOG] Gestor.descargarDocumentoTemp() - Total documentos temporales: " + documentosProyectoTemporal.size());
+        
+        for (Documento doc : documentosProyectoTemporal) {
+            System.out.println("[LOG] Gestor.descargarDocumentoTemp() - Comparando con: '" + doc.getNombre() + "'");
+            if (doc.getNombre().equals(nombreDocumento)) {
+                System.out.println("[LOG] Gestor.descargarDocumentoTemp() - Documento encontrado, descargando...");
+                
+                // Obtener el contenido del documento
+                byte[] contenidoArchivo = doc.getArchivo();
+                if (contenidoArchivo == null || contenidoArchivo.length == 0) {
+                    String error = "El documento '" + nombreDocumento + "' no tiene contenido";
+                    System.out.println("[ERROR] Gestor.descargarDocumentoTemp() - " + error);
+                    throw new Exception(error);
+                }
+                
+                // Crear directorio destino si no existe
+                java.io.File directorioDestino = new java.io.File(rutaDestino);
+                if (!directorioDestino.exists()) {
+                    boolean creado = directorioDestino.mkdirs();
+                    if (!creado) {
+                        String error = "No se pudo crear el directorio destino: " + rutaDestino;
+                        System.out.println("[ERROR] Gestor.descargarDocumentoTemp() - " + error);
+                        throw new Exception(error);
+                    }
+                }
+                
+                // Crear archivo destino con extensión
+                String nombreArchivo = nombreDocumento;
+                if (doc.getExtension() != null && !doc.getExtension().isEmpty()) {
+                    nombreArchivo += "." + doc.getExtension();
+                }
+                java.io.File archivoDestino = new java.io.File(directorioDestino, nombreArchivo);
+                
+                // Escribir contenido al archivo
+                java.nio.file.Files.write(archivoDestino.toPath(), contenidoArchivo);
+                
+                System.out.println("[LOG] Gestor.descargarDocumentoTemp() - Documento descargado a: " + archivoDestino.getAbsolutePath());
+                return;
+            }
+        }
+        
+        String error = "Documento '" + nombreDocumento + "' no encontrado en el proyecto temporal";
+        System.out.println("[ERROR] Gestor.descargarDocumentoTemp() - " + error);
+        throw new Exception(error);
     }
 }

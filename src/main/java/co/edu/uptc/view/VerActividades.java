@@ -23,6 +23,7 @@ public class VerActividades extends JPanel {
     private Texto instruccion;
     private IngresarCampo campoBusqueda;
     private Boton botonBuscar;
+    private Boton cancelar;
     private PanelRedondeado contenedorLista;
     private JPanel panelCentral;
     private final ColorConstante color = new ColorConstante();
@@ -45,6 +46,7 @@ public class VerActividades extends JPanel {
         campoBusqueda = new IngresarCampo(18);
         campoBusqueda.setPlaceholder("Nombre de la actividad");
         botonBuscar = new Boton("BUSCAR", 180, 40, "BUSCAR_ACTIVIDAD", 15, color.getVerdeBotones());
+        cancelar = new Boton("CANCELAR", 180, 40, "VOLVER_VER_PROYECTO/" + nombreProyecto, 15, color.getVerdeOscuro());
 
         contenedorLista = new PanelRedondeado();
         contenedorLista.setLayout(new BoxLayout(contenedorLista, BoxLayout.Y_AXIS));
@@ -114,6 +116,8 @@ public class VerActividades extends JPanel {
         pBuscar.setOpaque(false);
         pBuscar.add(botonBuscar);
         panelBusquedaRedondeado.add(pBuscar);
+        panelBusquedaRedondeado.add(Box.createVerticalStrut(10));
+        panelBusquedaRedondeado.add(cancelar);
 
         panelCentral.add(Box.createHorizontalStrut(15));
         panelCentral.add(panelBusquedaRedondeado);
@@ -164,6 +168,7 @@ public class VerActividades extends JPanel {
     private void agregarListeners() {
         if (listener != null) {
             botonBuscar.addActionListener(listener);
+            cancelar.addActionListener(listener);
         }
     }
 
