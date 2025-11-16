@@ -461,11 +461,17 @@ public class Gestor {
     }
     public void guardarDocumentoNuevoProyecto(String nombreDocumento, String tipoDocumento, String rutaArchivo) {
         System.out.println("[LOG] Gestor.guardarDocumentoNuevoProyecto() - Parámetros: nombre='" + nombreDocumento + "', tipo='" + tipoDocumento + "', ruta='" + rutaArchivo + "'");
+        System.out.println("[DEBUG] Gestor.guardarDocumentoNuevoProyecto() - Longitud del nombre: " + nombreDocumento.length());
+        System.out.println("[DEBUG] Gestor.guardarDocumentoNuevoProyecto() - Caracteres del nombre: " + java.util.Arrays.toString(nombreDocumento.toCharArray()));
         
         Documento docCreado = proyectoTemporal.registrarDocumento(nombreDocumento, tipoDocumento, rutaArchivo);
         if (docCreado != null) {
             documentosProyectoTemporal.add(docCreado);
             System.out.println("[LOG] Gestor.guardarDocumentoNuevoProyecto() - Documento '" + nombreDocumento + "' agregado exitosamente. Total documentos temporales: " + documentosProyectoTemporal.size());
+            
+            // Verificar que se guardó correctamente
+            System.out.println("[DEBUG] Gestor.guardarDocumentoNuevoProyecto() - Nombre almacenado en el documento: '" + docCreado.getNombre() + "'");
+            System.out.println("[DEBUG] Gestor.guardarDocumentoNuevoProyecto() - Caracteres del nombre almacenado: " + java.util.Arrays.toString(docCreado.getNombre().toCharArray()));
         } else {
             System.out.println("[ERROR] Gestor.guardarDocumentoNuevoProyecto() - No se pudo crear el documento");
         }
@@ -484,10 +490,13 @@ public class Gestor {
     }
 
     public void eliminarDocumentoProyectoTemporal(String nombre) {
+        System.out.println("[DEBUG] Gestor.eliminarDocumentoProyectoTemporal() - Buscando documento: '" + nombre + "'");
         for (int i = 0; i < documentosProyectoTemporal.size(); i++) {
-            if (documentosProyectoTemporal.get(i).getNombre().equals(nombre)) {
+            String nombreDocumento = documentosProyectoTemporal.get(i).getNombre();
+            System.out.println("[DEBUG] Gestor.eliminarDocumentoProyectoTemporal() - Comparando '" + nombreDocumento + "' con '" + nombre + "'");
+            if (nombreDocumento.equalsIgnoreCase(nombre)) {
                 documentosProyectoTemporal.remove(i);
-                System.out.println("[LOG] Gestor.eliminarDocumentoProyectoTemporal() - Documento '" + nombre + "' eliminado del proyecto temporal.");
+                System.out.println("[LOG] Gestor.eliminarDocumentoProyectoTemporal() - Documento '" + nombreDocumento + "' eliminado del proyecto temporal.");
                 return;
             }
         }
@@ -495,12 +504,19 @@ public class Gestor {
     }
 
     public void descargarDocumentoTemp(String nombreDocumento, String rutaDestino) throws Exception {
-        System.out.println("[LOG] Gestor.descargarDocumentoTemp() - Buscando documento: " + nombreDocumento);
+        System.out.println("[LOG] Gestor.descargarDocumentoTemp() - Buscando documento: '" + nombreDocumento + "'");
+        System.out.println("[DEBUG] Gestor.descargarDocumentoTemp() - Longitud del nombre buscado: " + nombreDocumento.length());
+        System.out.println("[DEBUG] Gestor.descargarDocumentoTemp() - Caracteres del nombre buscado: " + java.util.Arrays.toString(nombreDocumento.toCharArray()));
         System.out.println("[LOG] Gestor.descargarDocumentoTemp() - Total documentos temporales: " + documentosProyectoTemporal.size());
         
         for (Documento doc : documentosProyectoTemporal) {
-            System.out.println("[LOG] Gestor.descargarDocumentoTemp() - Comparando con: '" + doc.getNombre() + "'");
-            if (doc.getNombre().equals(nombreDocumento)) {
+            String nombreAlmacenado = doc.getNombre().toUpperCase();
+            System.out.println("[LOG] Gestor.descargarDocumentoTemp() - Comparando con: '" + nombreAlmacenado + "'");
+            System.out.println("[DEBUG] Gestor.descargarDocumentoTemp() - Longitud del nombre almacenado: " + nombreAlmacenado.length());
+            System.out.println("[DEBUG] Gestor.descargarDocumentoTemp() - Caracteres del nombre almacenado: " + java.util.Arrays.toString(nombreAlmacenado.toCharArray()));
+            System.out.println("[DEBUG] Gestor.descargarDocumentoTemp() - ¿Son iguales? " + nombreAlmacenado.equals(nombreDocumento));
+            
+            if (nombreAlmacenado.equals(nombreDocumento.toUpperCase())) {
                 System.out.println("[LOG] Gestor.descargarDocumentoTemp() - Documento encontrado, descargando...");
                 
                 // Obtener el contenido del documento

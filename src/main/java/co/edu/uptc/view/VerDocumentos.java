@@ -142,12 +142,15 @@ public class VerDocumentos extends JPanel {
     }
 
     private void cargarDocumentos(List<String> listaDocumentos) {
+        System.out.println("[LOG] VerDocumentos.cargarDocumentos() - Cargando " + (listaDocumentos != null ? listaDocumentos.size() : 0) + " documentos");
         contenedorLista.removeAll();
         if (listaDocumentos == null || listaDocumentos.isEmpty()) {
+            System.out.println("[LOG] VerDocumentos.cargarDocumentos() - No hay documentos, mostrando mensaje vacío");
             Texto vacio = new Texto("No hay documentos registrados para este proyecto", TipoTexto.NORMAL, "VERDE");
             vacio.setAlignmentX(CENTER_ALIGNMENT);
             contenedorLista.add(vacio);
         } else {
+            System.out.println("[LOG] VerDocumentos.cargarDocumentos() - Documentos a mostrar: " + listaDocumentos);
             for (String nombre : listaDocumentos) {
                 JPanel fila = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
                 fila.setOpaque(false);

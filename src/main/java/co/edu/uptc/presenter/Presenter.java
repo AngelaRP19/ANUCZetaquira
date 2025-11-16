@@ -99,20 +99,43 @@ public class Presenter implements ActionListener{
         }
         if (comando.startsWith("DESCARGAR_DOCUMENTO/")) {
             String[] partes = comando.substring("DESCARGAR_DOCUMENTO/".length()).split("/");
-            if(partes[1].equals("NUEVO_PROYECTO")){
-                System.out.println("entraaa");
-                descargarDocumentoTemp(partes[0]);
-            }else{
-                if (partes.length >= 2) {
-                descargarDocumento(partes[0], partes[1]);
-            }
+            System.out.println("[DEBUG] Presenter - Comando DESCARGAR_DOCUMENTO recibido: " + comando);
+            System.out.println("[DEBUG] Presenter - Partes del comando: " + java.util.Arrays.toString(partes));
+            System.out.println("[DEBUG] Presenter - Número de partes: " + partes.length);
+            
+            if (partes.length >= 2) {
+                System.out.println("[DEBUG] Presenter - Parte[0] (documento): '" + partes[0] + "'");
+                System.out.println("[DEBUG] Presenter - Parte[1] (proyecto): '" + partes[1] + "'");
+                
+                if(partes[1].equals("NUEVO_PROYECTO")){
+                    System.out.println("[LOG] Presenter - Descargando documento temporal: " + partes[0]);
+                    descargarDocumentoTemp(partes[0]);
+                } else {
+                    System.out.println("[LOG] Presenter - Descargando documento de proyecto existente: " + partes[0] + " del proyecto: " + partes[1]);
+                    descargarDocumento(partes[0], partes[1]);
+                }
+            } else {
+                System.out.println("[ERROR] Presenter - Comando DESCARGAR_DOCUMENTO mal formado: " + comando);
             }
         }
         else if (comando.startsWith("ELIMINAR_DOCUMENTO/")) {
             String[] partes = comando.substring("ELIMINAR_DOCUMENTO/".length()).split("/");
+            System.out.println("[LOG] Presenter - ELIMINAR_DOCUMENTO procesado. Partes: [" + String.join(", ", partes) + "]");
             if(partes[1].equals("NUEVO_PROYECTO")){
+                System.out.println("[LOG] Presenter - Eliminando documento '" + partes[0] + "' del proyecto temporal");
+                // Mostrar cantidad antes de eliminar
+                List<String> documentosAntes = gestorProyecto.getNombresDocumentosProyectoTemporal();
+                System.out.println("[LOG] Presenter - Documentos antes de eliminar: " + documentosAntes.size());
+                
                 gestorProyecto.eliminarDocumentoProyectoTemporal(partes[0]);
+                
+                // Mostrar cantidad después de eliminar
+                List<String> documentosDespues = gestorProyecto.getNombresDocumentosProyectoTemporal();
+                System.out.println("[LOG] Presenter - Documentos después de eliminar: " + documentosDespues.size());
+                System.out.println("[LOG] Presenter - Lista actualizada: " + documentosDespues);
+                
                 vista.showMessage("Documento eliminado");
+                System.out.println("[LOG] Presenter - Actualizando vista de documentos...");
                 verDocumentosNuevoProyecto();
             }else{
                 if (partes.length >= 2) {
@@ -186,7 +209,9 @@ public class Presenter implements ActionListener{
         }
         else if (comando.startsWith("GUARDAR_DOCUMENTO/")) {
             String nombre = comando.substring("GUARDAR_DOCUMENTO/".length());
-            if (!nombre.isEmpty()) {
+            if (!nombre.isEmpty() && !nombre.equals("NUEVO_PROYECTO")) {
+                // Solo manejar proyectos existentes aquí
+                // NUEVO_PROYECTO ya se maneja en el switch case arriba
                 guardarDocumento();
             }
         }
@@ -211,7 +236,7 @@ public class Presenter implements ActionListener{
                 verActividades();
             }
         }
-        else if (comando.startsWith("PANEL_VER_DOCUMENTOS")) {
+        else if (comando.startsWith("PANEL_VER_DOCUMENTOS") && !comando.equals("PANEL_VER_DOCUMENTOS_NUEVO_PROYECTO")) {
             if (comando.contains("/")) {
                 String nombre = comando.substring(comando.indexOf("/") + 1);
                 if (!nombre.isEmpty()) {
