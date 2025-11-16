@@ -13,10 +13,12 @@ public class Gestor {
     private List<Proyecto> proyectos;
     private Proyecto proyectoTemporal;
     private List<Documento> documentosProyectoTemporal;
+    private List<Actividad> actividadesProyectoTemporal;
 
     public Gestor() {
         this.proyectos = new ArrayList<>();
         this.documentosProyectoTemporal = new ArrayList<>();
+        this.actividadesProyectoTemporal = new ArrayList<>();
 
     }
 
@@ -47,26 +49,35 @@ public class Gestor {
                 for (Documento doc : documentosProyectoTemporal) {
                     proyecto.agregarDocumento(doc);
                 }
-                proyectos.add(proyecto);
-                System.out.println("Proyecto agregado exitosamente.");
-                registrarProyectoBD(proyecto);
-                System.out.println("Proyecto agregado exitosamente a la bd.");
-                 this.documentosProyectoTemporal = new ArrayList<>();
-                return true;
-            } else {
-                Proyecto proyecto = new Proyecto(nombre, descripcion, fechaInicio, estadoP);
-                for (Documento doc : documentosProyectoTemporal) {
-                    proyecto.agregarDocumento(doc);
+                for (Actividad act : actividadesProyectoTemporal) {
+                    proyecto.registrarActividad(act);
                 }
                 proyectos.add(proyecto);
                 System.out.println("Proyecto agregado exitosamente.");
                 registrarProyectoBD(proyecto);
                 System.out.println("Proyecto agregado exitosamente a la bd.");
                  this.documentosProyectoTemporal = new ArrayList<>();
+                 this.actividadesProyectoTemporal = new ArrayList<>();
+                 return true;
+            } else {
+                Proyecto proyecto = new Proyecto(nombre, descripcion, fechaInicio, estadoP);
+                for (Documento doc : documentosProyectoTemporal) {
+                    proyecto.agregarDocumento(doc);
+                }
+                for (Actividad act : actividadesProyectoTemporal) {
+                    proyecto.registrarActividad(act);
+                }
+                proyectos.add(proyecto);
+                System.out.println("Proyecto agregado exitosamente.");
+                registrarProyectoBD(proyecto);
+                System.out.println("Proyecto agregado exitosamente a la bd.");
+                 this.documentosProyectoTemporal = new ArrayList<>();
+                 this.actividadesProyectoTemporal = new ArrayList<>();
                 return true;
             }
         } else {
             this.documentosProyectoTemporal = new ArrayList<>();
+            this.actividadesProyectoTemporal = new ArrayList<>();
             return false;
         }
     }
@@ -556,5 +567,66 @@ public class Gestor {
         String error = "Documento '" + nombreDocumento + "' no encontrado en el proyecto temporal";
         System.out.println("[ERROR] Gestor.descargarDocumentoTemp() - " + error);
         throw new Exception(error);
+    }
+
+    // Métodos para manejar actividades temporales
+    public void guardarActividadNuevoProyecto(String nombre, Date fecha, String tipo, String descripcion) throws Exception {
+        System.out.println("[LOG] Gestor.guardarActividadNuevoProyecto() - Parámetros: nombre='" + nombre + "', tipo='" + tipo + "'");
+        
+        // Validar que no exista una actividad con el mismo nombre
+        for (Actividad act : actividadesProyectoTemporal) {
+            if (act.getNombre().equalsIgnoreCase(nombre)) {
+                String error = "Ya existe una actividad con el nombre '" + nombre + "' en el proyecto temporal";
+                System.out.println("[ERROR] Gestor.guardarActividadNuevoProyecto() - " + error);
+                throw new Exception(error);
+            }
+        }
+        
+        try {
+            // Crear la actividad temporal
+            TipoActividad tipoActividad = TipoActividad.valueOf(tipo.toUpperCase());
+            Actividad actividadCreada = new Actividad(nombre, descripcion, tipoActividad, fecha);
+            
+            actividadesProyectoTemporal.add(actividadCreada);
+            System.out.println("[LOG] Gestor.guardarActividadNuevoProyecto() - Actividad '" + nombre + "' agregada exitosamente. Total actividades temporales: " + actividadesProyectoTemporal.size());
+            
+        } catch (Exception e) {
+            String error = "Error al crear actividad '" + nombre + "': " + e.getMessage();
+            System.out.println("[ERROR] Gestor.guardarActividadNuevoProyecto() - " + error);
+            throw new Exception(error);
+        }
+    }
+
+    public List<String> getNombresActividadesProyectoTemporal() {
+        System.out.println("[LOG] Gestor.getNombresActividadesProyectoTemporal() - Total actividades: " + actividadesProyectoTemporal.size());
+        List<String> nombres = new ArrayList<>();
+        for (Actividad act : this.actividadesProyectoTemporal) {
+            nombres.add(act.getNombre());
+            System.out.println("[LOG] Gestor.getNombresActividadesProyectoTemporal() - Actividad: '" + act.getNombre() + "', Tipo: '" + act.getTipo() + "'");
+        }
+        return nombres;
+    }
+
+    public void eliminarActividadProyectoTemporal(String nombre) {
+        System.out.println("[DEBUG] Gestor.eliminarActividadProyectoTemporal() - Buscando actividad: '" + nombre + "'");
+        for (int i = 0; i < actividadesProyectoTemporal.size(); i++) {
+            String nombreActividad = actividadesProyectoTemporal.get(i).getNombre();
+            System.out.println("[DEBUG] Gestor.eliminarActividadProyectoTemporal() - Comparando '" + nombreActividad + "' con '" + nombre + "'");
+            if (nombreActividad.equalsIgnoreCase(nombre)) {
+                actividadesProyectoTemporal.remove(i);
+                System.out.println("[LOG] Gestor.eliminarActividadProyectoTemporal() - Actividad '" + nombreActividad + "' eliminada del proyecto temporal.");
+                return;
+            }
+        }
+        System.out.println("[LOG] Gestor.eliminarActividadProyectoTemporal() - Actividad '" + nombre + "' no encontrada en el proyecto temporal.");
+    }
+
+    public Actividad getActividadTemporal(String nombre) {
+        for (Actividad act : actividadesProyectoTemporal) {
+            if (act.getNombre().equalsIgnoreCase(nombre)) {
+                return act;
+            }
+        }
+        return null;
     }
 }

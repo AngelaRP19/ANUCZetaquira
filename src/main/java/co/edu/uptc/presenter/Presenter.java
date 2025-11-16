@@ -20,6 +20,7 @@ public class Presenter implements ActionListener{
     private String proyectoActual;
     private String actividadActual;
     String[] tiposDocumento;
+    String[] tiposActividad;
     
     public Presenter() {
         this.gestorProyecto = new Gestor();
@@ -27,6 +28,7 @@ public class Presenter implements ActionListener{
         this.proyectoActual = null;
         this.actividadActual = null;
         this.tiposDocumento = new String[] {"ACTA", "PROPUESTA", "INFORMES", "SOPORTE_FINANCIERO", "MATERIAL_TECNICO"};
+        this.tiposActividad = new String[] {"CAPACITACION", "ASISTENCIA_TECNICA", "DOTACION_EQUIPOS", "SEGUIMIENTO", "SOCIALIZACION"};
     }
 /*
     public void cargarTodoDesdeBD() {
@@ -78,6 +80,18 @@ public class Presenter implements ActionListener{
             case "PANEL_VER_DOCUMENTOS_NUEVO_PROYECTO":
                 System.out.println("[LOG] Presenter - Ver documentos del proyecto que se está creando.");
                 verDocumentosNuevoProyecto();
+                break;
+            case "PANEL_AGREGAR_ACTIVIDAD_NUEVO_PROYECTO":
+                System.out.println("[LOG] Presenter - Ir a agregar actividad del proyecto que se está creando.");
+                agregarActividadNuevoProyecto();
+                break;
+            case "GUARDAR_ACTIVIDAD/NUEVO_PROYECTO":
+                System.out.println("[LOG] Presenter - Guardar actividad de nuevo proyecto");
+                guardarActividadNuevoProyecto();
+                break;
+            case "PANEL_VER_ACTIVIDADES_NUEVO_PROYECTO":
+                System.out.println("[LOG] Presenter - Ver actividades del proyecto que se está creando.");
+                verActividadesNuevoProyecto();
                 break;
             case "CANCELAR_BUSQUEDA_PROYECTO":
                 System.out.println("[LOG] Presenter - Cancelar búsqueda de proyectos y mostrar todos.");
@@ -141,6 +155,33 @@ public class Presenter implements ActionListener{
                 if (partes.length >= 2) {
                 eliminarDocumento(partes[0], partes[1]);
             }
+            }
+        }
+        else if (comando.startsWith("ELIMINAR_ACTIVIDAD/")) {
+            String[] partes = comando.substring("ELIMINAR_ACTIVIDAD/".length()).split("/");
+            System.out.println("[LOG] Presenter - ELIMINAR_ACTIVIDAD procesado. Partes: [" + String.join(", ", partes) + "]");
+            if(partes[1].equals("NUEVO_PROYECTO")){
+                System.out.println("[LOG] Presenter - Eliminando actividad '" + partes[0] + "' del proyecto temporal");
+                // Mostrar cantidad antes de eliminar
+                List<String> actividadesAntes = gestorProyecto.getNombresActividadesProyectoTemporal();
+                System.out.println("[LOG] Presenter - Actividades antes de eliminar: " + actividadesAntes.size());
+                
+                gestorProyecto.eliminarActividadProyectoTemporal(partes[0]);
+                
+                // Mostrar cantidad después de eliminar
+                List<String> actividadesDespues = gestorProyecto.getNombresActividadesProyectoTemporal();
+                System.out.println("[LOG] Presenter - Actividades después de eliminar: " + actividadesDespues.size());
+                System.out.println("[LOG] Presenter - Lista actualizada: " + actividadesDespues);
+                
+                vista.showMessage("Actividad eliminada");
+                System.out.println("[LOG] Presenter - Actualizando vista de actividades...");
+                verActividadesNuevoProyecto();
+            }else{
+                if (partes.length >= 2) {
+                    // Para proyectos existentes, necesitamos establecer el proyecto actual
+                    this.proyectoActual = partes[1];
+                    eliminarActividad(partes[0]);
+                }
             }
         }else if (comando.startsWith("VER_PROYECTO/")) {
             String nombre = comando.substring("VER_PROYECTO/".length());
@@ -229,9 +270,20 @@ public class Presenter implements ActionListener{
         else if (comando.startsWith("VOLVER_VER_PROYECTOS")) {
             verProyectos();
         }
+        else if (comando.startsWith("VOLVER_VER_PROYECTO/")) {
+            String nombreProyecto = comando.substring("VOLVER_VER_PROYECTO/".length());
+            System.out.println("[LOG] Presenter - VOLVER_VER_PROYECTO procesado. Proyecto: '" + nombreProyecto + "'");
+            if (nombreProyecto.equals("NUEVO_PROYECTO")) {
+                System.out.println("[LOG] Presenter - Volviendo a crear proyecto temporal");
+                volverACrearProyecto();
+            } else {
+                System.out.println("[LOG] Presenter - Volviendo a ver proyecto existente: " + nombreProyecto);
+                verProyecto(nombreProyecto);
+            }
+        }
         else if (comando.startsWith("PANEL_VER_ACTIVIDADES")) {
             String nombre = comando.substring("PANEL_VER_ACTIVIDADES".length());
-            if (!nombre.isEmpty()) {
+            if (!nombre.isEmpty() && !nombre.equals("NUEVO_PROYECTO")) {
                 proyectoActual = nombre;
                 verActividades();
             }
@@ -1000,6 +1052,80 @@ public class Presenter implements ActionListener{
         if (documentosFiltrados.isEmpty()) {
             vista.showInfoMessage("No se encontraron documentos que contengan: '" + textoBusqueda + "'");
         }
+    }
+
+    // Métodos para manejar actividades temporales
+    private void agregarActividadNuevoProyecto() {
+        System.out.println("[LOG] Presenter.agregarActividadNuevoProyecto() - Iniciando");
+        this.guardarProyectoTemporal();
+        vista.crearActividad(tiposActividad, "NUEVO_PROYECTO");
+        System.out.println("[LOG] Presenter.agregarActividadNuevoProyecto() - Completado");
+    }
+
+    private void guardarActividadNuevoProyecto() {
+        System.out.println("[LOG] Presenter.guardarActividadNuevoProyecto() - Iniciando guardado");
+        
+        try {
+            // Obtener datos de la vista
+            String nombre = vista.getNombreActividad();
+            Date fecha = vista.getFechaActividad();
+            String tipo = vista.getTipoActividad();
+            String descripcion = vista.getDescripcionActividad();
+            
+            // Validar datos
+            if (!validarDatosActividad(nombre, fecha, tipo, descripcion)) {
+                return;
+            }
+            
+            // Guardar en temporal
+            gestorProyecto.guardarActividadNuevoProyecto(nombre, fecha, tipo, descripcion);
+            
+            System.out.println("[LOG] Presenter.guardarActividadNuevoProyecto() - Actividad guardada exitosamente");
+            vista.showMessage("Actividad guardada exitosamente.");
+            
+            // Volver a la vista de crear proyecto
+            volverACrearProyecto();
+            
+        } catch (Exception e) {
+            System.out.println("[ERROR] Presenter.guardarActividadNuevoProyecto() - " + e.getMessage());
+            vista.showErrorMessage("Error al guardar actividad: " + e.getMessage());
+        }
+    }
+
+    private boolean validarDatosActividad(String nombre, Date fecha, String tipo, String descripcion) {
+        System.out.println("[LOG] Presenter.validarDatosActividad() - Validando: nombre='" + nombre + "', tipo='" + tipo + "'");
+        
+        if (nombre == null || nombre.trim().isEmpty()) {
+            vista.showErrorMessage("El nombre de la actividad es obligatorio.");
+            return false;
+        }
+        
+        if (fecha == null) {
+            vista.showErrorMessage("La fecha de la actividad es obligatoria.");
+            return false;
+        }
+        
+        if (tipo == null || tipo.trim().isEmpty()) {
+            vista.showErrorMessage("El tipo de actividad es obligatorio.");
+            return false;
+        }
+        
+        if (descripcion == null || descripcion.trim().isEmpty()) {
+            vista.showErrorMessage("La descripción de la actividad es obligatoria.");
+            return false;
+        }
+        
+        System.out.println("[LOG] Presenter.validarDatosActividad() - Validación exitosa");
+        return true;
+    }
+
+    private void verActividadesNuevoProyecto() {
+        System.out.println("[LOG] Presenter.verActividadesNuevoProyecto() - Iniciando");
+        this.guardarProyectoTemporal();
+        List<String> nombresActividades = gestorProyecto.getNombresActividadesProyectoTemporal();
+        System.out.println("[LOG] Presenter.verActividadesNuevoProyecto() - Encontradas " + nombresActividades.size() + " actividades");
+        vista.verActividades(nombresActividades, "NUEVO_PROYECTO");
+        System.out.println("[LOG] Presenter.verActividadesNuevoProyecto() - Completado");
     }
 
 

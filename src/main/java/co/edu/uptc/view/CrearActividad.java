@@ -62,7 +62,11 @@ public class CrearActividad extends JPanel{
     }
     private void botones(){
         this.crearActividad = new Boton("Guardar", 160, 40, "GUARDAR_ACTIVIDAD/"+nombreProyecto, 15, color.getVerdeClaro());
-        this.cancelar = new Boton("Cancelar", 160, 40, "VOLVER_BIENVENIDA", 15, color.getVerdeOscuro());
+        if (nombreProyecto.equals("NUEVO_PROYECTO")) {
+            this.cancelar = new Boton("Cancelar", 160, 40, "VOLVER_VER_PROYECTO/NUEVO_PROYECTO", 15, color.getVerdeOscuro());
+        } else {
+            this.cancelar = new Boton("Cancelar", 160, 40, "VOLVER_BIENVENIDA", 15, color.getVerdeOscuro());
+        }
     }
 
     private void ubicarComponentes(){

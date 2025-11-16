@@ -68,7 +68,7 @@ public class CrearProyecto extends JPanel{
         this.cancelar = new Boton("Cancelar", 160, 40, "VOLVER_BIENVENIDA", 15, color.getVerdeOscuro());
         this.subirDocumento = new Boton("Subir documento", 250, 40, "PANEL_SUBIR_DOCUMENTO_NUEVO_PROYECTO", 15, color.getVerdeOpciones());
         this.verDocumentos = new Boton("Ver documentos", 250, 40, "PANEL_VER_DOCUMENTOS_NUEVO_PROYECTO", 15, color.getVerdeOpciones());
-        this.registrarActividad = new Boton("Crear Actividad", 250, 40, "PANEL_REGISTRAR_ACTIVIDAD_NUEVO_PROYECTO", 15, color.getVerdeOpciones());
+        this.registrarActividad = new Boton("Crear Actividad", 250, 40, "PANEL_AGREGAR_ACTIVIDAD_NUEVO_PROYECTO", 15, color.getVerdeOpciones());
         this.verActividades = new Boton("Ver Actividades", 250, 40, "PANEL_VER_ACTIVIDADES_NUEVO_PROYECTO", 15, color.getVerdeOpciones());
     }
 
