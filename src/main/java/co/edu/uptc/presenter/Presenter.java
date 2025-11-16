@@ -428,6 +428,11 @@ public class Presenter implements ActionListener{
     }
     private void guardarProyecto() {
         System.out.println("[LOG] Presenter.guardarProyecto() - Iniciando");
+        
+        // 0) Guardar proyecto temporal (actualiza datos del proyecto en memoria)
+        this.guardarProyectoTemporal();
+        System.out.println("[LOG] Presenter.guardarProyecto() - Proyecto temporal actualizado");
+        
         // 1) Leer valores desde la vista y sanear entradas de texto
         String nombreRaw = vista.getNombreProyecto();
         String nombre = (nombreRaw != null) ? nombreRaw.trim() : null;
@@ -483,6 +488,9 @@ public class Presenter implements ActionListener{
 
         // 5) Persistencia
         System.out.println("[LOG] Presenter.guardarProyecto() - Guardando proyecto en BD");
+        System.out.println("[LOG] Presenter.guardarProyecto() - Actividades temporales: " + gestorProyecto.getNombresActividadesProyectoTemporal().size());
+        System.out.println("[LOG] Presenter.guardarProyecto() - Documentos temporales: " + gestorProyecto.getNombresDocumentosProyectoTemporal().size());
+        
         if (gestorProyecto.agregarProyecto(nombre, fechaInicio, fechaFin, estado, descripcion)) {
             System.out.println("[LOG] Presenter.guardarProyecto() - Proyecto guardado exitosamente");
             vista.showMessage("Proyecto creado exitosamente.");

@@ -136,5 +136,23 @@ public class ProyectoDAO {
     }
     }
 
+    public int obtenerIdProyectoPorNombre(String nombreProyecto) {
+        String sql = "SELECT proyecto_id FROM proyectos WHERE nombre = ?";
+        
+        try (Connection conn = Conexion.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, nombreProyecto);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt("proyecto_id");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener ID del proyecto: " + e.getMessage());
+        }
+        
+        return -1;
+    }
 
 }

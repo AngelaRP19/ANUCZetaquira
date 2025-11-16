@@ -179,5 +179,27 @@ public class DocumentoDAO {
     return documentos;
     }
 
+    public boolean insertarDocumentoDesdeMemoria(int proyectoId, Documento documento) {
+        String sql = "INSERT INTO documentos (proyecto_id, nombre, tipo, archivo, extension) VALUES (?, ?, ?, ?, ?)";
+
+        try (Connection conn = Conexion.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, proyectoId);
+            pstmt.setString(2, documento.getNombre());
+            pstmt.setString(3, documento.getTipo().name());
+            pstmt.setBytes(4, documento.getArchivo());
+            pstmt.setString(5, documento.getExtension());
+
+            int filas = pstmt.executeUpdate();
+            return filas > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error al guardar documento desde memoria: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     
 }

@@ -46,51 +46,112 @@ public class Gestor {
             EstadoProyecto estadoP = EstadoProyecto.valueOf(estado.toUpperCase());
             if (fechaFin != null) {
                 Proyecto proyecto = new Proyecto(nombre, descripcion, fechaInicio, fechaFin, estadoP);
+                
+                System.out.println("[LOG] Gestor.agregarProyecto() - Agregando " + documentosProyectoTemporal.size() + " documentos temporales al proyecto");
                 for (Documento doc : documentosProyectoTemporal) {
                     proyecto.agregarDocumento(doc);
+                    System.out.println("[LOG] Gestor.agregarProyecto() - Documento agregado: " + doc.getNombre());
                 }
+                
+                System.out.println("[LOG] Gestor.agregarProyecto() - Agregando " + actividadesProyectoTemporal.size() + " actividades temporales al proyecto");
                 for (Actividad act : actividadesProyectoTemporal) {
                     proyecto.registrarActividad(act);
+                    System.out.println("[LOG] Gestor.agregarProyecto() - Actividad agregada: " + act.getNombre());
                 }
+                
                 proyectos.add(proyecto);
-                System.out.println("Proyecto agregado exitosamente.");
+                System.out.println("[LOG] Gestor.agregarProyecto() - Proyecto agregado a lista en memoria");
                 registrarProyectoBD(proyecto);
-                System.out.println("Proyecto agregado exitosamente a la bd.");
-                 this.documentosProyectoTemporal = new ArrayList<>();
-                 this.actividadesProyectoTemporal = new ArrayList<>();
-                 return true;
+                System.out.println("[LOG] Gestor.agregarProyecto() - Proyecto registrado en BD");
+                
+                this.documentosProyectoTemporal = new ArrayList<>();
+                this.actividadesProyectoTemporal = new ArrayList<>();
+                System.out.println("[LOG] Gestor.agregarProyecto() - Listas temporales limpiadas");
+                return true;
             } else {
                 Proyecto proyecto = new Proyecto(nombre, descripcion, fechaInicio, estadoP);
+                
+                System.out.println("[LOG] Gestor.agregarProyecto() - Agregando " + documentosProyectoTemporal.size() + " documentos temporales al proyecto");
                 for (Documento doc : documentosProyectoTemporal) {
                     proyecto.agregarDocumento(doc);
+                    System.out.println("[LOG] Gestor.agregarProyecto() - Documento agregado: " + doc.getNombre());
                 }
+                
+                System.out.println("[LOG] Gestor.agregarProyecto() - Agregando " + actividadesProyectoTemporal.size() + " actividades temporales al proyecto");
                 for (Actividad act : actividadesProyectoTemporal) {
                     proyecto.registrarActividad(act);
+                    System.out.println("[LOG] Gestor.agregarProyecto() - Actividad agregada: " + act.getNombre());
                 }
+                
                 proyectos.add(proyecto);
-                System.out.println("Proyecto agregado exitosamente.");
+                System.out.println("[LOG] Gestor.agregarProyecto() - Proyecto agregado a lista en memoria");
                 registrarProyectoBD(proyecto);
-                System.out.println("Proyecto agregado exitosamente a la bd.");
-                 this.documentosProyectoTemporal = new ArrayList<>();
-                 this.actividadesProyectoTemporal = new ArrayList<>();
+                System.out.println("[LOG] Gestor.agregarProyecto() - Proyecto registrado en BD");
+                
+                this.documentosProyectoTemporal = new ArrayList<>();
+                this.actividadesProyectoTemporal = new ArrayList<>();
+                System.out.println("[LOG] Gestor.agregarProyecto() - Listas temporales limpiadas");
                 return true;
             }
         } else {
             this.documentosProyectoTemporal = new ArrayList<>();
             this.actividadesProyectoTemporal = new ArrayList<>();
+            System.out.println("[LOG] Gestor.agregarProyecto() - Proyecto ya existe, listas temporales limpiadas");
             return false;
         }
     }
 
     private void registrarProyectoBD(Proyecto proyecto) {
+        System.out.println("[LOG] Gestor.registrarProyectoBD() - Iniciando registro en BD");
+        System.out.println("[LOG] Gestor.registrarProyectoBD() - Documentos en proyecto: " + proyecto.getDocumentos().size());
+        for (Documento doc : proyecto.getDocumentos()) {
+            System.out.println("[LOG] Gestor.registrarProyectoBD() - Documento en memoria: " + doc.getNombre());
+        }
+        System.out.println("[LOG] Gestor.registrarProyectoBD() - Actividades en proyecto: " + proyecto.getActividades().size());
+        for (Actividad act : proyecto.getActividades()) {
+            System.out.println("[LOG] Gestor.registrarProyectoBD() - Actividad en memoria: " + act.getNombre());
+        }
+        
+        // 1) Registrar el proyecto
         ProyectoDAO pdao = new ProyectoDAO();
         boolean insertado = pdao.registrarProyecto(proyecto);
 
-        if (insertado) {
-            System.out.println("Proyecto registrado exitosamente.");
-        } else {
-            System.out.println("Error al registrar el proyecto en la base de datos.");
+        if (!insertado) {
+            System.out.println("[ERROR] Gestor.registrarProyectoBD() - Error al registrar el proyecto en la base de datos");
+            return;
         }
+        
+        System.out.println("[LOG] Gestor.registrarProyectoBD() - Proyecto registrado exitosamente en BD");
+        
+        // 2) Registrar documentos del proyecto
+        System.out.println("[LOG] Gestor.registrarProyectoBD() - Registrando " + proyecto.getDocumentos().size() + " documentos");
+        DocumentoDAO documentoDAO = new DocumentoDAO();
+        for (Documento doc : proyecto.getDocumentos()) {
+            // Obtener el ID del proyecto que acabamos de insertar
+            int proyectoId = pdao.obtenerIdProyectoPorNombre(proyecto.getNombre());
+            if (proyectoId != -1) {
+                boolean docRegistrado = documentoDAO.insertarDocumentoDesdeMemoria(proyectoId, doc);
+                if (docRegistrado) {
+                    System.out.println("[LOG] Gestor.registrarProyectoBD() - Documento '" + doc.getNombre() + "' registrado");
+                } else {
+                    System.err.println("[ERROR] Gestor.registrarProyectoBD() - Error al registrar documento '" + doc.getNombre() + "'");
+                }
+            }
+        }
+        
+        // 3) Registrar actividades del proyecto
+        System.out.println("[LOG] Gestor.registrarProyectoBD() - Registrando " + proyecto.getActividades().size() + " actividades");
+        ActividadDAO actividadDAO = new ActividadDAO();
+        for (Actividad act : proyecto.getActividades()) {
+            boolean actRegistrada = actividadDAO.registrarActividad(proyecto.getNombre(), act);
+            if (actRegistrada) {
+                System.out.println("[LOG] Gestor.registrarProyectoBD() - Actividad '" + act.getNombre() + "' registrada");
+            } else {
+                System.err.println("[ERROR] Gestor.registrarProyectoBD() - Error al registrar actividad '" + act.getNombre() + "'");
+            }
+        }
+        
+        System.out.println("[LOG] Gestor.registrarProyectoBD() - Proyecto y sus relaciones registrados exitosamente en BD");
     }
 
     public void eliminarProyectoConDependencias(String nombreProyecto) {
