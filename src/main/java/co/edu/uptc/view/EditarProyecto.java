@@ -118,7 +118,7 @@ public class EditarProyecto extends JPanel{
         this.verDocumentos = new Boton("Ver documentos", 250, 40, "PANEL_VER_DOCUMENTOS/"+datos.get(0), 15, color.getVerdeOpciones());
         this.registrarActividad = new Boton("Crear Actividad", 250, 40, "PANEL_REGISTRAR_ACTIVIDAD", 15, color.getVerdeOpciones());
         this.verActividades = new Boton("Ver Actividades", 250, 40, "PANEL_VER_ACTIVIDADES"+datos.get(0), 15, color.getVerdeOpciones());
-        this.eliminarProyecto = new Boton("Eliminar Proyecto", 200, 40, "ELIMINAR_PROYECTO"+datos.get(0), 15, color.getVerdeOscuro());
+        this.eliminarProyecto = new Boton("Eliminar Proyecto", 200, 40, "ELIMINAR_PROYECTO/"+datos.get(0), 15, color.getVerdeOscuro());
     }
 
     private void ubicarComponentes(){

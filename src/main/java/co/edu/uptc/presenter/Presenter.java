@@ -188,14 +188,21 @@ public class Presenter implements ActionListener{
             verProyecto(nombre);
         }
        
-        else if (comando.equals("GUARDAR_ACTIVIDAD")) {
-            guardarActividad();
+        else if (comando.startsWith("GUARDAR_ACTIVIDAD/")) {
+            String nombreProyecto = comando.substring("GUARDAR_ACTIVIDAD/".length());
+            if ("NUEVO_PROYECTO".equals(nombreProyecto)) {
+                System.out.println("[LOG] Presenter - Guardar actividad de nuevo proyecto");
+                
+            } else {
+                System.out.println("[LOG] Presenter - Guardar actividad en proyecto existente: " + nombreProyecto);
+                guardarActividad();
+            }
         }
         else if (comando.equals("ELIMINAR_PROYECTO")) {
             eliminarProyecto();
         }
-        else if (comando.startsWith("ELIMINAR_PROYECTO")) {
-            String nombre = comando.substring("ELIMINAR_PROYECTO".length());
+        else if (comando.startsWith("ELIMINAR_PROYECTO/")) {
+            String nombre = comando.substring("ELIMINAR_PROYECTO/".length());
             if (!nombre.isEmpty()) {
                 proyectoActual = nombre;
                 eliminarProyecto();
@@ -549,8 +556,8 @@ public class Presenter implements ActionListener{
         }
         datosProyecto.add(fechaFinFormateada);
         
-        datosProyecto.add(proyecto.getDescripcion());
         datosProyecto.add(proyecto.getEstado().toString());
+        datosProyecto.add(proyecto.getDescripcion());
         
         vista.editarProyecto(datosProyecto);
         System.out.println("[LOG] Presenter.verProyecto() - Completado");
@@ -935,7 +942,7 @@ public class Presenter implements ActionListener{
         
         gestorProyecto.registrarDocumento(proyectoActual, nombre, tipo, rutaArchivo);
         vista.showMessage("Documento guardado exitosamente.");
-        vista.bienvenida();
+        this.verDocumentos();
     }
     private void validarDatosDocumento(String nombre, String tipo, String rutaArchivo) {
         System.out.println("[LOG] Presenter.validarDatosDocumento() - Validando: nombre='" + nombre + "', tipo='" + tipo + "', ruta='" + rutaArchivo + "'");
