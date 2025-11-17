@@ -812,4 +812,10 @@ public class Gestor {
             throw new Exception(error);
         }
     }
+
+    public void limpiarListas() {
+        documentosProyectoTemporal.clear();
+        actividadesProyectoTemporal.clear();
+        proyectoTemporal = null;
+    }
 }

@@ -67,6 +67,8 @@ public class Presenter implements ActionListener{
                 break;
             case "VOLVER_BIENVENIDA":
                 System.out.println("[LOG] Presenter - Volver a bienvenida");
+                gestorProyecto.limpiarListas();
+                proyectoActual = null;
                 vista.bienvenida();
                 break;
             case "PANEL_SUBIR_DOCUMENTO_NUEVO_PROYECTO":
@@ -290,6 +292,7 @@ public class Presenter implements ActionListener{
         }
         else if (comando.startsWith("VOLVER_VER_PROYECTOS")) {
             verProyectos();
+            gestorProyecto.limpiarListas();
         }
         else if (comando.startsWith("VOLVER_VER_PROYECTO/")) {
             String nombreProyecto = comando.substring("VOLVER_VER_PROYECTO/".length());
@@ -673,6 +676,9 @@ public class Presenter implements ActionListener{
     }
     
     private void cancelar() {
+        System.out.println("[LOG] Presenter.cancelar() - Limpiando listas temporales");
+        gestorProyecto.limpiarListas();
+        proyectoActual = null;
         vista.bienvenida();
     }
     
@@ -867,8 +873,11 @@ public class Presenter implements ActionListener{
         );
         
         if (respuesta == javax.swing.JOptionPane.YES_OPTION) {
-            gestorProyecto.eliminarActividad(proyectoActual, nombreActividad);
-            vista.showMessage("Actividad eliminada exitosamente.");
+            // NUNCA eliminar de BD directamente, solo de la lista temporal
+            // Los cambios se aplicarán a BD cuando el usuario confirme con "Guardar cambios"
+            System.out.println("[LOG] Presenter.eliminarActividad() - Eliminando '" + nombreActividad + "' solo de lista temporal");
+            gestorProyecto.eliminarActividadProyectoTemporal(nombreActividad);
+            vista.showMessage("Actividad eliminada.");
             actividadActual = null;
             verActividades();
         }
