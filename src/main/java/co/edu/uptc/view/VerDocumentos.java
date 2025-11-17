@@ -51,7 +51,7 @@ public class VerDocumentos extends JPanel {
 
         contenedorLista = new PanelRedondeado();
         contenedorLista.setLayout(new BoxLayout(contenedorLista, BoxLayout.Y_AXIS));
-        contenedorLista.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // padding interno
+        contenedorLista.setBorder(BorderFactory.createEmptyBorder(15, 10, 10, 10)); 
         
         panelCentral = new JPanel();
         panelCentral.setLayout(new BoxLayout(panelCentral, BoxLayout.X_AXIS));
@@ -152,7 +152,7 @@ public class VerDocumentos extends JPanel {
         } else {
             System.out.println("[LOG] VerDocumentos.cargarDocumentos() - Documentos a mostrar: " + listaDocumentos);
             for (String nombre : listaDocumentos) {
-                JPanel fila = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+                JPanel fila = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
                 fila.setOpaque(false);
                 // Botón con el nombre del documento
                 Boton btnDoc = new Boton(nombre, "DESCARGAR_DOCUMENTO/" + nombre + "/" + nombreProyecto, 500, 40, Boton.BotonEstilo.LISTA_PROYECTO);
@@ -191,9 +191,11 @@ public class VerDocumentos extends JPanel {
                     btnEliminar.addActionListener(listener);
                 }
                 contenedorLista.add(fila);
-                contenedorLista.add(Box.createVerticalStrut(10));
+                contenedorLista.add(Box.createVerticalStrut(3));
             }
         }
+        // Agregar glue al final para que los documentos se alineen arriba
+        contenedorLista.add(Box.createVerticalGlue());
         contenedorLista.revalidate();
         contenedorLista.repaint();
     }
@@ -243,6 +245,8 @@ public class VerDocumentos extends JPanel {
             Texto sinResultados = new Texto("No se encontraron documentos que coincidan con la búsqueda", TipoTexto.NORMAL, "VERDE");
             sinResultados.setAlignmentX(CENTER_ALIGNMENT);
             contenedorLista.add(sinResultados);
+            // Agregar glue al final para que el mensaje se alinee arriba
+            contenedorLista.add(Box.createVerticalGlue());
             contenedorLista.revalidate();
             contenedorLista.repaint();
         } else {

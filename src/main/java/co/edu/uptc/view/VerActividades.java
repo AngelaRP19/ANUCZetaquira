@@ -168,6 +168,8 @@ public class VerActividades extends JPanel {
                 }
             }
         }
+        // Agregar glue al final para que las actividades se alineen arriba
+        contenedorLista.add(Box.createVerticalGlue());
         contenedorLista.revalidate();
         contenedorLista.repaint();
     }
@@ -196,6 +198,8 @@ public class VerActividades extends JPanel {
             Texto sinResultados = new Texto("No se encontraron proyectos que coincidan con la búsqueda", TipoTexto.NORMAL, "VERDE");
             sinResultados.setAlignmentX(CENTER_ALIGNMENT);
             contenedorLista.add(sinResultados);
+            // Agregar glue al final para que el mensaje se alinee arriba
+            contenedorLista.add(Box.createVerticalGlue());
             contenedorLista.revalidate();
             contenedorLista.repaint();
         } else {
