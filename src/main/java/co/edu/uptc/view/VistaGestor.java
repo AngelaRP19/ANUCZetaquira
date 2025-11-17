@@ -134,6 +134,10 @@ public class VistaGestor extends JFrame{
         if (panelCrearProyecto != null) {
             return panelCrearProyecto.getNombreProyecto();
         }
+        
+        return null;
+    }
+    public String getNombreProyectoEditado() {
         if (panelEditarProyecto != null) {
             return panelEditarProyecto.getNombreProyecto();
         }
@@ -143,6 +147,9 @@ public class VistaGestor extends JFrame{
         if (panelCrearProyecto != null) {
             return panelCrearProyecto.getFechaInicio();
         }
+        return null;
+    }
+    public Date getFechaInicioProyectoEditado(){
         if (panelEditarProyecto != null) {
             return panelEditarProyecto.getFechaInicio();
         }
@@ -152,6 +159,9 @@ public class VistaGestor extends JFrame{
         if (panelCrearProyecto != null) {
             return panelCrearProyecto.getFechaFin();
         }
+        return null;
+    }
+    public Date getFechaFinProyectoEditado(){
         if (panelEditarProyecto != null) {
             return panelEditarProyecto.getFechaFin();
         }
@@ -161,6 +171,9 @@ public class VistaGestor extends JFrame{
         if (panelCrearProyecto != null) {
             return panelCrearProyecto.getEstado();
         }
+        return null;
+    }
+    public String getEstadoProyectoEditado(){
         if (panelEditarProyecto != null) {
             return panelEditarProyecto.getEstado();
         }
@@ -170,6 +183,9 @@ public class VistaGestor extends JFrame{
         if (panelCrearProyecto != null) {
             return panelCrearProyecto.getDescripcion();
         }
+        return null;
+    }
+    public String getDescripcionProyectoEditado(){
         if (panelEditarProyecto != null) {
             return panelEditarProyecto.getDescripcion();
         }

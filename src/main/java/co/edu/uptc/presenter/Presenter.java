@@ -573,13 +573,13 @@ public class Presenter implements ActionListener{
         }
         
         // 1) Leer valores desde la vista
-        String nombreRaw = vista.getNombreProyecto();
+        String nombreRaw = vista.getNombreProyectoEditado();
         String nombre = (nombreRaw != null) ? nombreRaw.trim() : null;
-        Date fechaInicio = vista.getFechaInicioProyecto();
-        Date fechaFin = vista.getFechaFinProyecto();
-        String descripcionRaw = vista.getDescripcionProyecto();
+        Date fechaInicio = vista.getFechaInicioProyectoEditado();
+        Date fechaFin = vista.getFechaFinProyectoEditado();
+        String descripcionRaw = vista.getDescripcionProyectoEditado();
         String descripcion = (descripcionRaw != null) ? descripcionRaw.trim() : null;
-        String estado = vista.getEstadoProyecto();
+        String estado = vista.getEstadoProyectoEditado();
         
         System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Datos leídos: nombre=" + nombre);
         
