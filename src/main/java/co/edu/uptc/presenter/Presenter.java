@@ -826,34 +826,27 @@ public class Presenter implements ActionListener{
             return;
         }
         
-        // Actualizar actividad
+        // Actualizar actividad SOLO en lista temporal, sin tocar BD
         try {
-            System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actualizando campos en BD");
+            System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actualizando actividad en lista temporal");
             
-            // Actualizar nombre si cambió
-            if (!nombre.equals(actividadActual)) {
-                System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actualizando nombre de '" + actividadActual + "' a '" + nombre + "'");
-                gestorProyecto.actualizarActividadCampo(proyectoActual, actividadActual, "nombre", nombre);
-                System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actualización nombre completada");
+            co.edu.uptc.model.TipoActividad tipoActividad = co.edu.uptc.model.TipoActividad.valueOf(tipo.toUpperCase());
+            
+            // Actualizar actividad en la lista temporal
+            boolean actualizada = gestorProyecto.actualizarActividadTemporal(actividadActual, nombre, descripcion, tipoActividad, fecha);
+            
+            if (actualizada) {
+                System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actividad actualizada en memoria");
                 actividadActual = nombre; // Actualizar referencia
-                System.out.println("[LOG] Presenter.guardarCambiosActividad() - Referencia interna actualizada a: " + actividadActual);
+                vista.showMessage("Actividad actualizada.");
+                verActividades();
+            } else {
+                System.err.println("[LOG] Presenter.guardarCambiosActividad() - ERROR: No se encontró la actividad");
+                vista.showErrorMessage("No se encontró la actividad a actualizar");
             }
-            
-            System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actualizando descripción: '" + descripcion + "'");
-            gestorProyecto.actualizarActividadCampo(proyectoActual, actividadActual, "descripcion", descripcion);
-            System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actualización descripción completada");
-            
-            System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actualizando tipo: '" + tipo + "'");
-            gestorProyecto.actualizarActividadCampo(proyectoActual, actividadActual, "tipo", tipo);
-            System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actualización tipo completada");
-            
-            System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actualizando fecha: " + fecha);
-            gestorProyecto.actualizarActividadCampo(proyectoActual, actividadActual, "fecha", fecha);
-            System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actualización fecha completada");
-            
-            System.out.println("[LOG] Presenter.guardarCambiosActividad() - Actividad actualizada exitosamente");
-            vista.showMessage("Actividad actualizada exitosamente.");
-            verActividades();
+        } catch (IllegalArgumentException e) {
+            System.err.println("[LOG] Presenter.guardarCambiosActividad() - ERROR: " + e.getMessage());
+            vista.showErrorMessage("Tipo de actividad inválido: " + tipo);
         } catch (Exception e) {
             System.err.println("[LOG] Presenter.guardarCambiosActividad() - ERROR: " + e.getMessage());
             vista.showErrorMessage("Error al actualizar la actividad: " + e.getMessage());

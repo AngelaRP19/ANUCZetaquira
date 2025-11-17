@@ -747,6 +747,28 @@ public class Gestor {
         System.out.println("[ERROR] Gestor.actualizarActividadTemporal() - Actividad '" + nombreAntiguo + "' no encontrada en el proyecto temporal");
     }
 
+    /**
+     * Actualiza una actividad en la lista temporal con nuevos valores.
+     * Retorna true si se actualizó exitosamente, false si no se encontró.
+     */
+    public boolean actualizarActividadTemporal(String nombreAntiguo, String nuevoNombre, String descripcion, TipoActividad tipo, Date fecha) {
+        System.out.println("[LOG] Gestor.actualizarActividadTemporal() - Buscando actividad: '" + nombreAntiguo + "'");
+        
+        // Buscar la actividad en la lista temporal por el nombre antiguo
+        for (int i = 0; i < actividadesProyectoTemporal.size(); i++) {
+            if (actividadesProyectoTemporal.get(i).getNombre().equalsIgnoreCase(nombreAntiguo)) {
+                // Crear nueva actividad con los valores actualizados
+                Actividad actividadActualizada = new Actividad(nuevoNombre, descripcion, tipo, fecha);
+                actividadesProyectoTemporal.set(i, actividadActualizada);
+                System.out.println("[LOG] Gestor.actualizarActividadTemporal() - Actividad '" + nombreAntiguo + "' actualizada a '" + nuevoNombre + "' exitosamente");
+                return true;
+            }
+        }
+        
+        System.out.println("[ERROR] Gestor.actualizarActividadTemporal() - Actividad '" + nombreAntiguo + "' no encontrada en el proyecto temporal");
+        return false;
+    }
+
     public void guardarMemoriaProyectoActual (String nombre){
         // Si ya hay un proyecto temporal activo con el mismo nombre, NO recargar
         // para evitar perder los cambios temporales (actividades/documentos agregados)
