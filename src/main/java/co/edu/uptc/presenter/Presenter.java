@@ -55,6 +55,7 @@ public class Presenter implements ActionListener{
                 break;
             case "CREAR_PROYECTO":
                 System.out.println("[LOG] Presenter - Ir a crear proyecto");
+                gestorProyecto.limpiarListas();
                 crearProyecto();
                 break;
             case "VER_PROYECTOS":
@@ -506,6 +507,7 @@ public class Presenter implements ActionListener{
             System.out.println("[LOG] Presenter.guardarProyecto() - ERROR: No se pudo guardar");
             vista.showErrorMessage("No se pudo crear el proyecto. Por favor, intente de nuevo.");
         }
+        gestorProyecto.limpiarListas();
     }
 
     public void crearProyecto() {
@@ -626,6 +628,7 @@ public class Presenter implements ActionListener{
             System.out.println("[LOG] Presenter.guardarCambiosProyecto() - ERROR: No se pudieron guardar los cambios");
             vista.showErrorMessage("No se pudieron guardar los cambios. Por favor, intente de nuevo.");
         }
+        gestorProyecto.limpiarListas();
     }
     
     private void eliminarProyecto() {
