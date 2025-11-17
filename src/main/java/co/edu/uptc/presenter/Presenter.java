@@ -287,7 +287,6 @@ public class Presenter implements ActionListener{
         // Comandos adicionales que faltaban
         else if (comando.startsWith("VOLVER_VER_PROYECTOS")) {
             verProyectos();
-            gestorProyecto.limpiarListas();
         }
         else if (comando.startsWith("VOLVER_VER_PROYECTO/")) {
             String nombreProyecto = comando.substring("VOLVER_VER_PROYECTO/".length());
@@ -336,7 +335,11 @@ public class Presenter implements ActionListener{
             String nombre = comando.substring("VOLVER_PROYECTO/".length());
             if (!nombre.isEmpty()) {
                 proyectoActual = nombre;
-                verProyecto(nombre);
+                if(proyectoActual.equals("NUEVO_PROYECTO")){
+                    volverACrearProyecto();
+                }else{
+                    verProyecto(nombre);
+                }
             }
         }
         else if (comando.equals("PANEL_REGISTRAR_ACTIVIDAD")) {
