@@ -102,6 +102,7 @@ public class Presenter implements ActionListener{
                 break;
             case "GUARDAR_PROYECTO":
                 guardarProyecto();
+                gestorProyecto.limpiarListas();
                 break;
             case "GUARDAR_CAMBIOS":
                 guardarCambiosProyecto();

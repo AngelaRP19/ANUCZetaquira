@@ -68,6 +68,7 @@ public class Gestor {
                 
                 this.documentosProyectoTemporal = new ArrayList<>();
                 this.actividadesProyectoTemporal = new ArrayList<>();
+                this.proyectoTemporal = null;
                 System.out.println("[LOG] Gestor.agregarProyecto() - Listas temporales limpiadas");
                 return true;
             } else {
@@ -92,12 +93,14 @@ public class Gestor {
                 
                 this.documentosProyectoTemporal = new ArrayList<>();
                 this.actividadesProyectoTemporal = new ArrayList<>();
+                this.proyectoTemporal = null;
                 System.out.println("[LOG] Gestor.agregarProyecto() - Listas temporales limpiadas");
                 return true;
             }
         } else {
             this.documentosProyectoTemporal = new ArrayList<>();
             this.actividadesProyectoTemporal = new ArrayList<>();
+            this.proyectoTemporal = null;
             System.out.println("[LOG] Gestor.agregarProyecto() - Proyecto ya existe, listas temporales limpiadas");
             return false;
         }
@@ -203,13 +206,13 @@ public class Gestor {
         System.out.println("[DEBUG] Gestor.obtenerNombresDocumentosDeProyecto() - proyectoTemporal es null: " + (proyectoTemporal == null));
         if (proyectoTemporal != null) {
             System.out.println("[DEBUG] Gestor.obtenerNombresDocumentosDeProyecto() - proyectoTemporal.getNombre(): '" + proyectoTemporal.getNombre() + "'");
-            System.out.println("[DEBUG] Gestor.obtenerNombresDocumentosDeProyecto() - Comparación equals: " + proyectoTemporal.getNombre().equals(nombreProyecto));
+            System.out.println("[DEBUG] Gestor.obtenerNombresDocumentosDeProyecto() - Comparación equalsIgnoreCase: " + proyectoTemporal.getNombre().equalsIgnoreCase(nombreProyecto));
         }
         System.out.println("[DEBUG] Gestor.obtenerNombresDocumentosDeProyecto() - documentosProyectoTemporal.size(): " + documentosProyectoTemporal.size());
         
         // Si estamos editando un proyecto, trabajar solo con la lista temporal
         // (que ya contiene los documentos de BD cargados por guardarMemoriaProyectoActual)
-        if (proyectoTemporal != null && proyectoTemporal.getNombre().toUpperCase().equals(nombreProyecto.toUpperCase())) {
+        if (proyectoTemporal != null && proyectoTemporal.getNombre().equalsIgnoreCase(nombreProyecto)) {
             List<String> documentos = new ArrayList<>();
             for (Documento doc : documentosProyectoTemporal) {
                 documentos.add(doc.getNombre());
@@ -574,16 +577,30 @@ public class Gestor {
         System.out.println("[DEBUG] Gestor.guardarDocumentoNuevoProyecto() - Longitud del nombre: " + nombreDocumento.length());
         System.out.println("[DEBUG] Gestor.guardarDocumentoNuevoProyecto() - Caracteres del nombre: " + java.util.Arrays.toString(nombreDocumento.toCharArray()));
         
-        Documento docCreado = proyectoTemporal.registrarDocumento(nombreDocumento, tipoDocumento, rutaArchivo);
-        if (docCreado != null) {
+        try {
+            // Leer el archivo
+            byte[] archivoBytes = java.nio.file.Files.readAllBytes(java.nio.file.Path.of(rutaArchivo));
+            TipoDocumento tipoDoc = TipoDocumento.valueOf(tipoDocumento.toUpperCase());
+            
+            // Obtener extensión del archivo
+            String extension = "";
+            int puntoIndex = rutaArchivo.lastIndexOf('.');
+            if (puntoIndex != -1 && puntoIndex < rutaArchivo.length() - 1) {
+                extension = rutaArchivo.substring(puntoIndex + 1);
+            }
+            
+            // Crear el documento directamente
+            Documento docCreado = new Documento(nombreDocumento, tipoDoc, archivoBytes, extension);
             documentosProyectoTemporal.add(docCreado);
             System.out.println("[LOG] Gestor.guardarDocumentoNuevoProyecto() - Documento '" + nombreDocumento + "' agregado exitosamente. Total documentos temporales: " + documentosProyectoTemporal.size());
             
             // Verificar que se guardó correctamente
             System.out.println("[DEBUG] Gestor.guardarDocumentoNuevoProyecto() - Nombre almacenado en el documento: '" + docCreado.getNombre() + "'");
             System.out.println("[DEBUG] Gestor.guardarDocumentoNuevoProyecto() - Caracteres del nombre almacenado: " + java.util.Arrays.toString(docCreado.getNombre().toCharArray()));
-        } else {
-            System.out.println("[ERROR] Gestor.guardarDocumentoNuevoProyecto() - No se pudo crear el documento");
+        } catch (IllegalArgumentException e) {
+            System.err.println("[ERROR] Gestor.guardarDocumentoNuevoProyecto() - Tipo de documento inválido: " + tipoDocumento);
+        } catch (java.io.IOException e) {
+            System.err.println("[ERROR] Gestor.guardarDocumentoNuevoProyecto() - Error al leer el archivo: " + e.getMessage());
         }
     }
     public List<String> getNombresDocumentosProyectoTemporal() {
@@ -814,9 +831,11 @@ public class Gestor {
     }
 
     public void limpiarListas() {
+        System.out.println("[LOG] Gestor.limpiarListas() - Limpiando listas temporales y proyecto temporal");
         documentosProyectoTemporal.clear();
         actividadesProyectoTemporal.clear();
         proyectoTemporal = null;
+        System.out.println("[LOG] Gestor.limpiarListas() - Listas limpiadas exitosamente");
     }
 
     public boolean guardarCambiosProyecto(String nombreAntiguo, String nuevoNombre, Date fechaInicio, Date fechaFin, String estado, String descripcion) {
