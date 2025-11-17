@@ -15,6 +15,8 @@ public class Gestor {
     private List<Documento> documentosProyectoTemporal;
     private List<Actividad> actividadesProyectoTemporal;
 
+    
+
     public Gestor() {
         this.proyectos = new ArrayList<>();
         this.documentosProyectoTemporal = new ArrayList<>();
@@ -197,14 +199,35 @@ public class Gestor {
     }
 
     public List<String> obtenerNombresDocumentosDeProyecto(String nombreProyecto) {
-        Proyecto proyecto = buscarProyectoPorNombre(nombreProyecto);
+        System.out.println("[DEBUG] Gestor.obtenerNombresDocumentosDeProyecto() - nombreProyecto recibido: '" + nombreProyecto + "'");
+        System.out.println("[DEBUG] Gestor.obtenerNombresDocumentosDeProyecto() - proyectoTemporal es null: " + (proyectoTemporal == null));
+        if (proyectoTemporal != null) {
+            System.out.println("[DEBUG] Gestor.obtenerNombresDocumentosDeProyecto() - proyectoTemporal.getNombre(): '" + proyectoTemporal.getNombre() + "'");
+            System.out.println("[DEBUG] Gestor.obtenerNombresDocumentosDeProyecto() - Comparación equals: " + proyectoTemporal.getNombre().equals(nombreProyecto));
+        }
+        System.out.println("[DEBUG] Gestor.obtenerNombresDocumentosDeProyecto() - documentosProyectoTemporal.size(): " + documentosProyectoTemporal.size());
+        
+        // Si estamos editando un proyecto, trabajar solo con la lista temporal
+        // (que ya contiene los documentos de BD cargados por guardarMemoriaProyectoActual)
+        if (proyectoTemporal != null && proyectoTemporal.getNombre().toUpperCase().equals(nombreProyecto.toUpperCase())) {
+            List<String> documentos = new ArrayList<>();
+            for (Documento doc : documentosProyectoTemporal) {
+                documentos.add(doc.getNombre());
+            }
+            System.out.println("[LOG] Gestor.obtenerNombresDocumentosDeProyecto() - Retornando documentos temporales: " + documentos.size());
+            return documentos;
+        }
 
+        // Si no hay proyecto temporal activo, buscar en BD (caso de solo lectura)
+        Proyecto proyecto = buscarProyectoPorNombre(nombreProyecto);
         if (proyecto == null) {
             System.out.println("No se encontró el proyecto '" + nombreProyecto);
             return new ArrayList<>();
         }
 
-        return proyecto.obtenerNombresDocumentosProyecto();
+        List<String> documentos = proyecto.obtenerNombresDocumentosProyecto();
+        System.out.println("[LOG] Gestor.obtenerNombresDocumentosDeProyecto() - Retornando documentos de BD: " + documentos.size());
+        return documentos;
     }
 
     private void eliminarProyectoBD(Proyecto proyecto) {
@@ -307,8 +330,24 @@ public class Gestor {
     }
 
     public Actividad consultarActividad(String nombreProyecto, String nombreActividad) {
+        System.out.println("[DEBUG] Gestor.consultarActividad() - Buscando actividad '" + nombreActividad + "' en proyecto '" + nombreProyecto + "'");
+        
+        // Si estamos editando un proyecto, buscar en la lista temporal
+        if (proyectoTemporal != null && proyectoTemporal.getNombre().equalsIgnoreCase(nombreProyecto)) {
+            System.out.println("[DEBUG] Gestor.consultarActividad() - Buscando en lista temporal (" + actividadesProyectoTemporal.size() + " actividades)");
+            for (Actividad act : actividadesProyectoTemporal) {
+                System.out.println("[DEBUG] Gestor.consultarActividad() - Comparando '" + act.getNombre() + "' con '" + nombreActividad + "'");
+                if (act.getNombre().equalsIgnoreCase(nombreActividad)) {
+                    System.out.println("[LOG] Gestor.consultarActividad() - Actividad encontrada en lista temporal");
+                    return act;
+                }
+            }
+            System.out.println("[LOG] Gestor.consultarActividad() - Actividad no encontrada en lista temporal");
+            return null;
+        }
+        
+        // Si no hay proyecto temporal, buscar en BD
         Proyecto proyecto = buscarProyectoPorNombre(nombreProyecto);
-
         if (proyecto == null) {
             System.out.println("El proyecto no existe.");
             return null;
@@ -316,6 +355,7 @@ public class Gestor {
 
         for (Actividad act : proyecto.getActividades()) {
             if (act.getNombre().equalsIgnoreCase(nombreActividad)) {
+                System.out.println("[LOG] Gestor.consultarActividad() - Actividad encontrada en BD");
                 return act;
             }
         }
@@ -357,19 +397,33 @@ public class Gestor {
     }
 
     public List<Actividad> consultarActividadesDeProyecto(String nombreProyecto) {
-        Proyecto proyecto = buscarProyectoPorNombre(nombreProyecto);
+        System.out.println("[DEBUG] Gestor.consultarActividadesDeProyecto() - nombreProyecto recibido: '" + nombreProyecto + "'");
+        System.out.println("[DEBUG] Gestor.consultarActividadesDeProyecto() - proyectoTemporal es null: " + (proyectoTemporal == null));
+        if (proyectoTemporal != null) {
+            System.out.println("[DEBUG] Gestor.consultarActividadesDeProyecto() - proyectoTemporal.getNombre(): '" + proyectoTemporal.getNombre() + "'");
+        }
+        System.out.println("[DEBUG] Gestor.consultarActividadesDeProyecto() - actividadesProyectoTemporal.size(): " + actividadesProyectoTemporal.size());
+        
+        // Si estamos editando un proyecto, trabajar solo con la lista temporal
+        // (que ya contiene las actividades de BD cargadas por guardarMemoriaProyectoActual)
+        if (proyectoTemporal != null && proyectoTemporal.getNombre().equalsIgnoreCase(nombreProyecto)) {
+            System.out.println("[LOG] Gestor.consultarActividadesDeProyecto() - Retornando actividades temporales: " + actividadesProyectoTemporal.size());
+            return new ArrayList<>(actividadesProyectoTemporal);
+        }
 
+        // Si no hay proyecto temporal activo, buscar en BD (caso de solo lectura)
+        Proyecto proyecto = buscarProyectoPorNombre(nombreProyecto);
         if (proyecto == null) {
             System.out.println("El proyecto no existe.");
             return new ArrayList<>();
         }
 
         List<Actividad> actividades = proyecto.getActividades();
-
         if (actividades.isEmpty()) {
             System.out.println("El proyecto no tiene actividades registradas.");
         }
 
+        System.out.println("[LOG] Gestor.consultarActividadesDeProyecto() - Retornando actividades de BD: " + actividades.size());
         return actividades;
     }
 
@@ -458,22 +512,6 @@ public class Gestor {
         }
     }
 
-    public void descargarDocumento(String nombreProyecto, String nombreDocumento, String rutaDestino) {
-        Proyecto proyecto = buscarProyectoPorNombre(nombreProyecto);
-
-        if (proyecto == null) {
-            System.out.println("El proyecto '" + nombreProyecto + "' no existe.");
-            return;
-        }
-
-        boolean descargado = proyecto.descargarDocumento(nombreDocumento, rutaDestino);
-
-        if (descargado) {
-            System.out.println("El documento '" + nombreDocumento + "' se descargó correctamente.");
-        } else {
-            System.out.println("No se pudo descargar el documento '" + nombreDocumento + "'.");
-        }
-    }
 
     public void eliminarDocumento(String nombreProyecto, String nombreDocumento) {
         Proyecto proyecto = buscarProyectoPorNombre(nombreProyecto);
@@ -707,5 +745,49 @@ public class Gestor {
         }
         
         System.out.println("[ERROR] Gestor.actualizarActividadTemporal() - Actividad '" + nombreAntiguo + "' no encontrada en el proyecto temporal");
+    }
+
+    public void guardarMemoriaProyectoActual (String nombre){
+        // Si ya hay un proyecto temporal activo con el mismo nombre, NO recargar
+        // para evitar perder los cambios temporales (actividades/documentos agregados)
+        if (proyectoTemporal != null && proyectoTemporal.getNombre().equalsIgnoreCase(nombre)) {
+            System.out.println("[LOG] Gestor.guardarMemoriaProyectoActual() - Proyecto temporal ya activo para '" + nombre + "', conservando cambios temporales");
+            return;
+        }
+        
+        System.out.println("[LOG] Gestor.guardarMemoriaProyectoActual() - Cargando proyecto '" + nombre + "' en memoria temporal");
+        this.proyectoTemporal = this.buscarProyectoPorNombre(nombre);
+        this.documentosProyectoTemporal = new ArrayList<>(this.proyectoTemporal.getDocumentos());
+        this.actividadesProyectoTemporal = new ArrayList<>(this.proyectoTemporal.getActividades());
+        System.out.println("[LOG] Gestor.guardarMemoriaProyectoActual() - Cargados " + documentosProyectoTemporal.size() + " documentos y " + actividadesProyectoTemporal.size() + " actividades");
+    }
+
+    /**
+     * Guarda una actividad en la lista temporal (para proyectos existentes en edición).
+     * Similar a guardarActividadNuevoProyecto pero con parámetros en diferente orden.
+     */
+    public void guardarActividadProyectoTemporal(String nombre, String descripcion, TipoActividad tipo, Date fecha) throws Exception {
+        System.out.println("[LOG] Gestor.guardarActividadProyectoTemporal() - Parámetros: nombre='" + nombre + "', tipo='" + tipo + "'");
+        
+        // Validar que no exista una actividad con el mismo nombre
+        for (Actividad act : actividadesProyectoTemporal) {
+            if (act.getNombre().equalsIgnoreCase(nombre)) {
+                String error = "Ya existe una actividad con el nombre '" + nombre + "' en el proyecto temporal";
+                System.out.println("[ERROR] Gestor.guardarActividadProyectoTemporal() - " + error);
+                throw new Exception(error);
+            }
+        }
+        
+        try {
+            // Crear la actividad temporal
+            Actividad actividadCreada = new Actividad(nombre, descripcion, tipo, fecha);
+            actividadesProyectoTemporal.add(actividadCreada);
+            System.out.println("[LOG] Gestor.guardarActividadProyectoTemporal() - Actividad '" + nombre + "' agregada exitosamente. Total actividades temporales: " + actividadesProyectoTemporal.size());
+            
+        } catch (Exception e) {
+            String error = "Error al crear actividad '" + nombre + "': " + e.getMessage();
+            System.out.println("[ERROR] Gestor.guardarActividadProyectoTemporal() - " + error);
+            throw new Exception(error);
+        }
     }
 }

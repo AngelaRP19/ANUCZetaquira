@@ -85,10 +85,7 @@ public class Presenter implements ActionListener{
                 System.out.println("[LOG] Presenter - Ir a agregar actividad del proyecto que se está creando.");
                 agregarActividadNuevoProyecto();
                 break;
-            case "GUARDAR_ACTIVIDAD/NUEVO_PROYECTO":
-                System.out.println("[LOG] Presenter - Guardar actividad de nuevo proyecto");
-                guardarActividadNuevoProyecto();
-                break;
+           
             case "PANEL_VER_ACTIVIDADES_NUEVO_PROYECTO":
                 System.out.println("[LOG] Presenter - Ver actividades del proyecto que se está creando.");
                 verActividadesNuevoProyecto();
@@ -121,13 +118,7 @@ public class Presenter implements ActionListener{
                 System.out.println("[DEBUG] Presenter - Parte[0] (documento): '" + partes[0] + "'");
                 System.out.println("[DEBUG] Presenter - Parte[1] (proyecto): '" + partes[1] + "'");
                 
-                if(partes[1].equals("NUEVO_PROYECTO")){
-                    System.out.println("[LOG] Presenter - Descargando documento temporal: " + partes[0]);
-                    descargarDocumentoTemp(partes[0]);
-                } else {
-                    System.out.println("[LOG] Presenter - Descargando documento de proyecto existente: " + partes[0] + " del proyecto: " + partes[1]);
-                    descargarDocumento(partes[0], partes[1]);
-                }
+                descargarDocumentoTemp(partes[0]);
             } else {
                 System.out.println("[ERROR] Presenter - Comando DESCARGAR_DOCUMENTO mal formado: " + comando);
             }
@@ -153,8 +144,10 @@ public class Presenter implements ActionListener{
                 verDocumentosNuevoProyecto();
             }else{
                 if (partes.length >= 2) {
-                eliminarDocumento(partes[0], partes[1]);
-            }
+                    // Para proyectos existentes, eliminar solo de lista temporal
+                    System.out.println("[LOG] Presenter - Eliminando documento '" + partes[0] + "' del proyecto '" + partes[1] + "' (solo lista temporal)");
+                    eliminarDocumento(partes[0], partes[1]);
+                }
             }
         }
         else if (comando.startsWith("ELIMINAR_ACTIVIDAD/")) {
@@ -190,12 +183,18 @@ public class Presenter implements ActionListener{
        
         else if (comando.startsWith("GUARDAR_ACTIVIDAD/")) {
             String nombreProyecto = comando.substring("GUARDAR_ACTIVIDAD/".length());
-            if ("NUEVO_PROYECTO".equals(nombreProyecto)) {
-                System.out.println("[LOG] Presenter - Guardar actividad de nuevo proyecto");
-                
-            } else {
+            if(nombreProyecto.equals("NUEVO_PROYECTO")){
+                System.out.println("[LOG] Presenter - Guardar actividad en nuevo proyecto");
+                guardarActividadNuevoProyecto();
+                //Volver a la vista de crear proyecto (para que el usuario pueda agregar más actividades o documentos)
+                volverACrearProyecto();
+            }else{
+                // Guardar actividad en proyecto existente (usando lista temporal)
                 System.out.println("[LOG] Presenter - Guardar actividad en proyecto existente: " + nombreProyecto);
                 guardarActividad();
+                // Volver a mostrar el proyecto con los cambios aplicados (actividades/documentos temporales)
+                System.out.println("[LOG] Presenter - Volviendo a mostrar proyecto '" + nombreProyecto + "' con cambios temporales");
+                verProyecto(nombreProyecto);
             }
         }
         else if (comando.equals("ELIMINAR_PROYECTO")) {
@@ -527,6 +526,7 @@ public class Presenter implements ActionListener{
     private void verProyecto(String nombreProyecto) {
         System.out.println("[LOG] Presenter.verProyecto() - Buscando proyecto: " + nombreProyecto);
         this.proyectoActual = nombreProyecto;
+        gestorProyecto.guardarMemoriaProyectoActual(nombreProyecto);
         Proyecto proyecto = gestorProyecto.buscarProyectoPorNombre(nombreProyecto);
         
         if (proyecto == null) {
@@ -772,14 +772,24 @@ public class Presenter implements ActionListener{
             return;
         }
         
-        // Registrar actividad
+        // Guardar actividad en lista temporal cuando se está editando un proyecto
+        // NO guardar directamente en BD - los cambios se aplicarán cuando el usuario confirme con "Guardar cambios"
+        System.out.println("[LOG] Presenter.guardarActividad() - Guardando actividad temporalmente:");
+        System.out.println("   - Proyecto: " + proyectoActual);
+        System.out.println("   - Nombre: " + nombre);
+        System.out.println("   - Tipo: " + tipo);
+        System.out.println("   - Fecha: " + fecha);
+        System.out.println("   - Descripción: " + descripcion);
+        
         try {
             co.edu.uptc.model.TipoActividad tipoActividad = co.edu.uptc.model.TipoActividad.valueOf(tipo.toUpperCase());
-            gestorProyecto.registrarActividad(proyectoActual, nombre, descripcion, tipoActividad, fecha);
-            vista.showMessage("Actividad creada exitosamente.");
+            gestorProyecto.guardarActividadProyectoTemporal(nombre, descripcion, tipoActividad, fecha);
+            vista.showMessage("Actividad agregada.");
             verActividades();
         } catch (IllegalArgumentException e) {
             vista.showErrorMessage("Tipo de actividad inválido: " + tipo);
+        } catch (Exception e) {
+            vista.showErrorMessage(e.getMessage());
         }
     }
     
@@ -895,12 +905,6 @@ public class Presenter implements ActionListener{
         vista.verDocumentos(documentos, proyectoActual);
         System.out.println("[LOG] Presenter.verDocumentos() - Completado");
     }
-    //se debe escoger la ruta
-    private void descargarDocumento(String nombreDocumento, String nombreProyecto) {
-        String rutaDestino = vista.seleccionarCarpetaDescarga();
-        gestorProyecto.descargarDocumento(nombreProyecto, nombreDocumento, rutaDestino);
-        vista.showMessage("Documento descargado exitosamente en: " + rutaDestino);
-    }
     
     private void eliminarDocumento(String nombreDocumento, String nombreProyecto) {
         int respuesta = javax.swing.JOptionPane.showConfirmDialog(
@@ -911,8 +915,11 @@ public class Presenter implements ActionListener{
         );
         
         if (respuesta == javax.swing.JOptionPane.YES_OPTION) {
-            gestorProyecto.eliminarDocumento(nombreProyecto, nombreDocumento);
-            vista.showMessage("Documento eliminado exitosamente.");
+            // NUNCA eliminar de BD directamente, solo de la lista temporal
+            // Los cambios se aplicarán a BD cuando el usuario confirme con "Guardar cambios"
+            System.out.println("[LOG] Presenter.eliminarDocumento() - Eliminando '" + nombreDocumento + "' solo de lista temporal");
+            gestorProyecto.eliminarDocumentoProyectoTemporal(nombreDocumento);
+            vista.showMessage("Documento eliminado.");
             verDocumentos();
         }
     }
@@ -933,16 +940,16 @@ public class Presenter implements ActionListener{
         // Validaciones
         validarDatosDocumento(nombre, tipo, rutaArchivo);
         
-        // Registrar documento
-        System.out.println("[LOG] Presenter.guardarDocumento() - Registrando documento:");
+        // Guardar documento en lista temporal cuando se está editando un proyecto
+        System.out.println("[LOG] Presenter.guardarDocumento() - Guardando documento temporalmente:");
         System.out.println("   - Proyecto: " + proyectoActual);
         System.out.println("   - Nombre: " + nombre);
         System.out.println("   - Tipo: " + tipo);
         System.out.println("   - Ruta: " + rutaArchivo);
         
-        gestorProyecto.registrarDocumento(proyectoActual, nombre, tipo, rutaArchivo);
-        vista.showMessage("Documento guardado exitosamente.");
-        this.verDocumentos();
+        gestorProyecto.guardarDocumentoNuevoProyecto(nombre, tipo, rutaArchivo);
+        vista.showMessage("Documento agregado.");
+        this.verProyecto(this.proyectoActual);
     }
     private void validarDatosDocumento(String nombre, String tipo, String rutaArchivo) {
         System.out.println("[LOG] Presenter.validarDatosDocumento() - Validando: nombre='" + nombre + "', tipo='" + tipo + "', ruta='" + rutaArchivo + "'");
@@ -1123,8 +1130,7 @@ public class Presenter implements ActionListener{
             System.out.println("[LOG] Presenter.guardarActividadNuevoProyecto() - Actividad guardada exitosamente");
             vista.showMessage("Actividad guardada exitosamente.");
             
-            // Volver a la vista de crear proyecto (para que el usuario pueda agregar más actividades o documentos)
-            volverACrearProyecto();
+            
             
         } catch (Exception e) {
             System.out.println("[ERROR] Presenter.guardarActividadNuevoProyecto() - " + e.getMessage());
