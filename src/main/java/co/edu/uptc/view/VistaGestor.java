@@ -161,7 +161,9 @@ public class VistaGestor extends JFrame{
         if (panelCrearProyecto != null) {
             return panelCrearProyecto.getEstado();
         }
-        // EditarProyecto no tiene getEstado(), solo CrearProyecto
+        if (panelEditarProyecto != null) {
+            return panelEditarProyecto.getEstado();
+        }
         return null;
     }
     public String getDescripcionProyecto(){

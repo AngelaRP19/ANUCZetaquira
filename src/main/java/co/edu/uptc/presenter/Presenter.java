@@ -104,7 +104,7 @@ public class Presenter implements ActionListener{
                 guardarProyecto();
                 break;
             case "GUARDAR_CAMBIOS":
-                guardarProyecto();
+                guardarCambiosProyecto();
                 break;
             case "CANCELAR":
                 cancelar();
@@ -284,12 +284,6 @@ public class Presenter implements ActionListener{
         }
         
         // Comandos adicionales que faltaban
-        else if (comando.startsWith("EDITAR_PROYECTO")) {
-            String nombre = comando.substring("EDITAR_PROYECTO".length());
-            if (!nombre.isEmpty()) {
-                verProyecto(nombre);
-            }
-        }
         else if (comando.startsWith("VOLVER_VER_PROYECTOS")) {
             verProyectos();
             gestorProyecto.limpiarListas();
@@ -574,78 +568,60 @@ public class Presenter implements ActionListener{
             return;
         }
         
-        // Leer valores desde la vista
+        // 1) Leer valores desde la vista
         String nombreRaw = vista.getNombreProyecto();
         String nombre = (nombreRaw != null) ? nombreRaw.trim() : null;
         Date fechaInicio = vista.getFechaInicioProyecto();
         Date fechaFin = vista.getFechaFinProyecto();
         String descripcionRaw = vista.getDescripcionProyecto();
         String descripcion = (descripcionRaw != null) ? descripcionRaw.trim() : null;
-        String estadoRaw = vista.getEstadoProyecto();
-        String estado = (estadoRaw != null) ? estadoRaw.trim() : null;
+        String estado = vista.getEstadoProyecto();
         
-        System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Datos leídos");
+        System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Datos leídos: nombre=" + nombre);
         
-        // Validaciones
+        // 2) Validaciones
         if (nombre == null || nombre.isEmpty()) {
-            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - ERROR: Nombre vacío");
             vista.showErrorMessage("El nombre del proyecto es obligatorio.");
             return;
         }
         if (fechaInicio == null) {
-            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - ERROR: Fecha inicio vacía");
             vista.showErrorMessage("La fecha de inicio es obligatoria.");
             return;
         }
         if (descripcion == null || descripcion.isEmpty()) {
-            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - ERROR: Descripción vacía");
             vista.showErrorMessage("La descripción es obligatoria.");
             return;
         }
         if (estado == null || estado.isEmpty()) {
-            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - ERROR: Estado vacío");
             vista.showErrorMessage("El estado es obligatorio.");
             return;
         }
         if (fechaFin != null && fechaFin.before(fechaInicio)) {
-            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - ERROR: Fechas inconsistentes");
             vista.showErrorMessage("La fecha de finalización no puede ser anterior a la fecha de inicio.");
             return;
         }
         
-        // Actualizar en el modelo
-        System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualizando campos en BD");
-        
-        // Actualizar nombre si cambió
-        if (!nombre.equals(proyectoActual)) {
-            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualizando nombre de '" + proyectoActual + "' a '" + nombre + "'");
-            gestorProyecto.actualizarProyectoCampo(proyectoActual, "nombre", nombre);
-            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualización nombre completada");
-            proyectoActual = nombre; // Actualizar referencia
-            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Referencia interna actualizada a: " + proyectoActual);
+        // 3) Validar que no exista otro proyecto con el nuevo nombre (si cambió)
+        if (!nombre.equalsIgnoreCase(proyectoActual) && gestorProyecto.proyectoExiste(nombre)) {
+            vista.showErrorMessage("Ya existe un proyecto con el nombre '" + nombre + "'.");
+            return;
         }
         
-        System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualizando descripción: '" + descripcion + "'");
-        gestorProyecto.actualizarProyectoCampo(proyectoActual, "descripcion", descripcion);
-        System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualización descripción completada");
+        // 4) Guardar cambios: eliminar proyecto anterior y crear uno nuevo con los datos actualizados + listas temporales
+        System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Guardando cambios en BD");
+        boolean exito = gestorProyecto.guardarCambiosProyecto(proyectoActual, nombre, fechaInicio, fechaFin, estado, descripcion);
         
-        System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualizando fecha inicio: " + fechaInicio);
-        gestorProyecto.actualizarProyectoCampo(proyectoActual, "fecha_inicio", fechaInicio);
-        System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualización fecha inicio completada");
-        
-        if (fechaFin != null) {
-            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualizando fecha fin: " + fechaFin);
-            gestorProyecto.actualizarProyectoCampo(proyectoActual, "fecha_fin", fechaFin);
-            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualización fecha fin completada");
+        if (exito) {
+            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Cambios guardados exitosamente");
+            // 5) Limpiar listas temporales
+            gestorProyecto.limpiarListas();
+            proyectoActual = null;
+            vista.showMessage("Cambios guardados exitosamente.");
+            vista.bienvenida();
+        } else {
+            System.out.println("[LOG] Presenter.guardarCambiosProyecto() - ERROR: No se pudieron guardar los cambios");
+            vista.showErrorMessage("No se pudieron guardar los cambios. Por favor, intente de nuevo.");
         }
-        
-        System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualizando estado: '" + estado + "'");
-        gestorProyecto.actualizarProyectoCampo(proyectoActual, "estado", estado);
-        System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Actualización estado completada");
-        
-        System.out.println("[LOG] Presenter.guardarCambiosProyecto() - Proyecto actualizado exitosamente");
-        vista.showMessage("Proyecto actualizado exitosamente.");
-        vista.bienvenida();
     }
     
     private void eliminarProyecto() {

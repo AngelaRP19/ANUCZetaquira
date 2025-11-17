@@ -818,4 +818,46 @@ public class Gestor {
         actividadesProyectoTemporal.clear();
         proyectoTemporal = null;
     }
+
+    public boolean guardarCambiosProyecto(String nombreAntiguo, String nuevoNombre, Date fechaInicio, Date fechaFin, String estado, String descripcion) {
+        try {
+            System.out.println("[LOG] Gestor.guardarCambiosProyecto() - Iniciando guardado de cambios");
+            System.out.println("[LOG] Proyecto antiguo: " + nombreAntiguo);
+            System.out.println("[LOG] Proyecto nuevo: " + nuevoNombre);
+            System.out.println("[LOG] Documentos temporales: " + documentosProyectoTemporal.size());
+            System.out.println("[LOG] Actividades temporales: " + actividadesProyectoTemporal.size());
+
+            // 1. Eliminar el proyecto anterior con todas sus dependencias
+            eliminarProyectoConDependencias(nombreAntiguo);
+            
+            // 2. Convertir el string de estado a enum
+            EstadoProyecto estadoEnum = EstadoProyecto.valueOf(estado.toUpperCase());
+            
+            // 3. Crear el nuevo proyecto con los datos actualizados
+            Proyecto proyectoNuevo = new Proyecto(nuevoNombre, descripcion, fechaInicio, fechaFin, estadoEnum);
+            
+            // 4. Cargar las actividades temporales al nuevo proyecto
+            proyectoNuevo.cargarActividades(actividadesProyectoTemporal);
+            
+            // 5. Cargar los documentos temporales al nuevo proyecto
+            proyectoNuevo.cargarDocumentos(documentosProyectoTemporal);
+            
+            // 6. Agregar el proyecto a la lista en memoria
+            proyectos.add(proyectoNuevo);
+            
+            // 7. Registrar el proyecto nuevo en la base de datos con todas sus dependencias
+            registrarProyectoBD(proyectoNuevo);
+            
+            System.out.println("[LOG] Gestor.guardarCambiosProyecto() - Cambios guardados exitosamente");
+            return true;
+            
+        } catch (Exception e) {
+            System.err.println("[ERROR] Gestor.guardarCambiosProyecto() - Error al guardar cambios: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public void guardarCambios(String nombre) {
+        
+    }
 }

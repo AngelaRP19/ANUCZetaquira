@@ -112,7 +112,7 @@ public class EditarProyecto extends JPanel{
         }
     }
     private void botones(){
-        this.guardarCambios = new Boton("Guardar Cambios", 200, 40, "EDITAR_PROYECTO"+datos.get(0), 15, color.getVerdeClaro());
+        this.guardarCambios = new Boton("Guardar Cambios", 200, 40, "GUARDAR_CAMBIOS", 15, color.getVerdeClaro());
         this.cancelar = new Boton("Cancelar", 200, 40, "VOLVER_VER_PROYECTOS", 15, color.getVerdeOscuro());
         this.subirDocumento = new Boton("Subir documento", 250, 40, "PANEL_SUBIR_DOCUMENTO", 15, color.getVerdeOpciones());
         this.verDocumentos = new Boton("Ver documentos", 250, 40, "PANEL_VER_DOCUMENTOS/"+datos.get(0), 15, color.getVerdeOpciones());
@@ -252,6 +252,9 @@ public class EditarProyecto extends JPanel{
     }
     public Date getFechaFin() {
         return campoFechaFin.getFechaCalendar();
+    }
+    public String getEstado() {
+        return (String) estado.getSelectedItem();
     }
     public String getDescripcion() {
         return descripcion.getText();
