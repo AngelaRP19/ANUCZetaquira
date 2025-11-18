@@ -39,7 +39,7 @@ public class VerProyectos extends JPanel {
     }
 
     private void inicializarComponentes() {
-        titulo = new Texto("PROYECTOS REGISTRADOS", TipoTexto.TITULO, "VERDE");
+        titulo = new Texto("Proyectos Registrados", TipoTexto.TITULO, "VERDE");
         instruccion = new Texto("Haga click sobre un proyecto para ver sus detalles, editar o eliminar. ", TipoTexto.INSTRUCCION, "VERDE");
         campoBusqueda = new IngresarCampo(18);
         campoBusqueda.setPlaceholder("Nombre del proyecto");

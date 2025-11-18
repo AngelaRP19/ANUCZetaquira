@@ -1,5 +1,6 @@
 package co.edu.uptc.model;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -15,15 +16,42 @@ public class Gestor {
     private List<Documento> documentosProyectoTemporal;
     private List<Actividad> actividadesProyectoTemporal;
 
-    
+    private Documento manualUsuario;
 
     public Gestor() {
         this.proyectos = new ArrayList<>();
         this.documentosProyectoTemporal = new ArrayList<>();
         this.actividadesProyectoTemporal = new ArrayList<>();
-
+        this.leerManualDeUsuario();
     }
 
+    private void leerManualDeUsuario() {
+        try {
+            byte[] archivoBytes = getClass().getClassLoader().getResourceAsStream("manual_usuario.pdf").readAllBytes();
+            this.manualUsuario = new Documento("ManualUsuario", TipoDocumento.MATERIAL_TECNICO, archivoBytes, "pdf");
+            System.out.println("[LOG] Gestor.leerManualDeUsuario() - Manual de usuario cargado correctamente");
+        } catch (IOException e) {
+            System.err.println("[ERROR] Gestor.leerManualDeUsuario() - Error al cargar el manual de usuario: " + e.getMessage());
+            e.printStackTrace();
+        } catch (NullPointerException e) {
+            System.err.println("[ERROR] Gestor.leerManualDeUsuario() - No se encontró el archivo manual_usuario.pdf en los recursos");
+            e.printStackTrace();
+        }
+        
+    }
+    public void descargarManualUsuario(String rutaDestino) {
+        if (manualUsuario == null) {
+            System.err.println("[ERROR] Gestor.descargarManualUsuario() - Manual de usuario no está disponible");
+        }else{
+            try {
+                java.nio.file.Files.write(java.nio.file.Path.of(rutaDestino), manualUsuario.getArchivo());
+                System.out.println("[LOG] Gestor.descargarManualUsuario() - Manual de usuario descargado en: " + rutaDestino);
+            } catch (IOException e) {
+                System.err.println("[ERROR] Gestor.descargarManualUsuario() - Error al descargar el manual de usuario: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
     public void cargarTodoDesdeBD() {
         ProyectoDAO proyectoDAO = new ProyectoDAO();
         ActividadDAO actividadDAO = new ActividadDAO();
@@ -233,14 +261,7 @@ public class Gestor {
         return documentos;
     }
 
-    private void eliminarProyectoBD(Proyecto proyecto) {
-        ProyectoDAO dao = new ProyectoDAO();
-        boolean eliminado = dao.eliminarProyecto(proyecto.getIdentificador());
 
-        if (!eliminado) {
-            System.out.println("Error al eliminar el proyecto de la base de datos.");
-        }
-    }
 
     public void actualizarProyectoCampo(String nombreProyecto, String campo, Object nuevoValor) {
         Proyecto proyecto = buscarProyectoPorNombre(nombreProyecto);
@@ -846,7 +867,7 @@ public class Gestor {
             System.out.println("[LOG] Documentos temporales: " + documentosProyectoTemporal.size());
             System.out.println("[LOG] Actividades temporales: " + actividadesProyectoTemporal.size());
 
-            // 1. Eliminar el proyecto anterior con todas sus dependencias
+            // 1. Eliminar el proyecto anterior con todas sus dependencia
             eliminarProyectoConDependencias(nombreAntiguo);
             
             // 2. Convertir el string de estado a enum

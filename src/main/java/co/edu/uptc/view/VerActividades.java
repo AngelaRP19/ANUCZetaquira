@@ -41,7 +41,7 @@ public class VerActividades extends JPanel {
     }
 
     private void inicializarComponentes() {
-        titulo = new Texto("ACITIVIDADES REGISTRADAS", TipoTexto.TITULO, "VERDE");
+        titulo = new Texto("Actividades Registradas", TipoTexto.TITULO, "VERDE");
         instruccion = new Texto("<html>Haga click sobre una actividad para ver sus detalles, editar o eliminar. </html>", TipoTexto.INSTRUCCION, "VERDE");
         campoBusqueda = new IngresarCampo(18);
         campoBusqueda.setPlaceholder("Nombre de la actividad");

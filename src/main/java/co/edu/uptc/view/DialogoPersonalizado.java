@@ -200,7 +200,7 @@ public class DialogoPersonalizado {
             }
         };
         wrapper.setLayout(new BorderLayout());
-        wrapper.setPreferredSize(new Dimension(420, 160));
+        wrapper.setPreferredSize(new Dimension(420, 200));
         wrapper.setOpaque(false);
         wrapper.setBorder(new EmptyBorder(20, 25, 15, 25));
         wrapper.setBackground(color.getBlanco());

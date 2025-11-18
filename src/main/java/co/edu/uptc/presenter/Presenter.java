@@ -64,7 +64,7 @@ public class Presenter implements ActionListener{
                 break;
             case "MANUAL_USUARIO":
                 System.out.println("[LOG] Presenter - Descargar manual de usuario");
-                vista.descargarManualUsuario();
+                descargarManualUsuario();
                 break;
             case "VOLVER_BIENVENIDA":
                 System.out.println("[LOG] Presenter - Volver a bienvenida");
@@ -639,11 +639,16 @@ public class Presenter implements ActionListener{
             return;
         }
         
-        int respuesta = javax.swing.JOptionPane.showConfirmDialog(
+        Object[] opciones = {"Sí", "No"};
+        int respuesta = javax.swing.JOptionPane.showOptionDialog(
             vista,
             "¿Está seguro de que desea eliminar el proyecto '" + proyectoActual + "'?",
             "Confirmar eliminación",
-            javax.swing.JOptionPane.YES_NO_OPTION
+            javax.swing.JOptionPane.YES_NO_OPTION,
+            javax.swing.JOptionPane.QUESTION_MESSAGE,
+            null,
+            opciones,
+            opciones[1]
         );
         
         if (respuesta == javax.swing.JOptionPane.YES_OPTION) {
@@ -848,11 +853,16 @@ public class Presenter implements ActionListener{
             return;
         }
         
-        int respuesta = javax.swing.JOptionPane.showConfirmDialog(
+        Object[] opciones = {"Sí", "No"};
+        int respuesta = javax.swing.JOptionPane.showOptionDialog(
             null,
             "¿Está seguro de que desea eliminar la actividad '" + nombreActividad + "'?",
             "Confirmar eliminación",
-            javax.swing.JOptionPane.YES_NO_OPTION
+            javax.swing.JOptionPane.YES_NO_OPTION,
+            javax.swing.JOptionPane.QUESTION_MESSAGE,
+            null,
+            opciones,
+            opciones[1]
         );
         
         if (respuesta == javax.swing.JOptionPane.YES_OPTION) {
@@ -892,11 +902,16 @@ public class Presenter implements ActionListener{
     }
     
     private void eliminarDocumento(String nombreDocumento, String nombreProyecto) {
-        int respuesta = javax.swing.JOptionPane.showConfirmDialog(
+        Object[] opciones = {"Sí", "No"};
+        int respuesta = javax.swing.JOptionPane.showOptionDialog(
             null,
             "¿Está seguro de que desea eliminar el documento '" + nombreDocumento + "'?",
             "Confirmar eliminación",
-            javax.swing.JOptionPane.YES_NO_OPTION
+            javax.swing.JOptionPane.YES_NO_OPTION,
+            javax.swing.JOptionPane.QUESTION_MESSAGE,
+            null,
+            opciones,
+            opciones[1]
         );
         
         if (respuesta == javax.swing.JOptionPane.YES_OPTION) {
@@ -1236,6 +1251,17 @@ public class Presenter implements ActionListener{
             System.out.println("[ERROR] Presenter.editarActividadTemporal() - " + e.getMessage());
             e.printStackTrace();
             vista.showErrorMessage("Error al actualizar actividad: " + e.getMessage());
+        }
+    }
+
+    private void descargarManualUsuario() {
+        String rutaCarpeta = vista.seleccionarCarpetaDescarga();
+        if (rutaCarpeta != null) {
+            String rutaDestino = rutaCarpeta + "\\manual_usuario.pdf";
+            gestorProyecto.descargarManualUsuario(rutaDestino);
+            vista.showMessage("Manual de usuario descargado exitosamente en: " + rutaDestino);
+        } else {
+            vista.showInfoMessage("Descarga del manual de usuario cancelada.");
         }
     }
 

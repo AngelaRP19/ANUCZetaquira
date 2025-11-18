@@ -42,7 +42,7 @@ public class VerDocumentos extends JPanel {
     }
 
     private void inicializarComponentes() {
-        titulo = new Texto("DOCUMENTOS DEL PROYECTO", TipoTexto.TITULO, "VERDE");
+        titulo = new Texto("Documentos del Proyecto", TipoTexto.TITULO, "VERDE");
         instruccion = new Texto("Haga click en descargar o eliminar un documento.", TipoTexto.INSTRUCCION, "VERDE");
         campoBusqueda = new IngresarCampo(18);
         campoBusqueda.setPlaceholder("Nombre del documento");
