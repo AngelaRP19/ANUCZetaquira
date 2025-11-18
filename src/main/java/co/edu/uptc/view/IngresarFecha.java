@@ -7,6 +7,11 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.AWTEvent;
+import java.awt.Toolkit;
+import java.awt.event.AWTEventListener;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -32,7 +37,8 @@ public class IngresarFecha extends JPanel {
     private JDialog dialogoCalendario;
     private JCalendar calendario;
     private SimpleDateFormat formatoFecha;
-    private boolean seleccionada = false; 
+    private boolean seleccionada = false;
+    private AWTEventListener clickFueraListener; 
     
     public IngresarFecha(int ancho) {
         setLayout(new BorderLayout());
@@ -139,9 +145,7 @@ public class IngresarFecha extends JPanel {
             Calendar fechaSeleccionada = calendario.getCalendar();
             campoTexto.setText(formatoFecha.format(fechaSeleccionada.getTime()));
             seleccionada = true;
-            if (dialogoCalendario != null) {
-                dialogoCalendario.dispose();
-            }
+            cerrarCalendario();
         });
     }
     
@@ -157,7 +161,54 @@ public class IngresarFecha extends JPanel {
             java.awt.Point ubicacion = campoTexto.getLocationOnScreen();
             dialogoCalendario.setLocation(ubicacion.x, ubicacion.y + campoTexto.getHeight());
             
+            // Agregar listener para cerrar al hacer clic fuera
+            agregarListenerClickFuera();
+            
             dialogoCalendario.setVisible(true);
+        }
+    }
+    
+    private void agregarListenerClickFuera() {
+        // Remover listener anterior si existe
+        if (clickFueraListener != null) {
+            Toolkit.getDefaultToolkit().removeAWTEventListener(clickFueraListener);
+        }
+        
+        clickFueraListener = new AWTEventListener() {
+            @Override
+            public void eventDispatched(AWTEvent event) {
+                if (event instanceof MouseEvent && event.getID() == MouseEvent.MOUSE_PRESSED) {
+                    MouseEvent mouseEvent = (MouseEvent) event;
+                    
+                    // Verificar si el clic fue fuera del diálogo del calendario
+                    if (dialogoCalendario != null && dialogoCalendario.isVisible()) {
+                        java.awt.Point puntoClick = mouseEvent.getLocationOnScreen();
+                        java.awt.Rectangle limites = dialogoCalendario.getBounds();
+                        
+                        // Si el clic no está dentro del diálogo, cerrarlo
+                        if (!limites.contains(puntoClick)) {
+                            cerrarCalendario();
+                        }
+                    }
+                }
+            }
+        };
+        
+        Toolkit.getDefaultToolkit().addAWTEventListener(
+            clickFueraListener,
+            AWTEvent.MOUSE_EVENT_MASK
+        );
+    }
+    
+    private void cerrarCalendario() {
+        if (dialogoCalendario != null && dialogoCalendario.isVisible()) {
+            dialogoCalendario.dispose();
+            
+            // Remover el listener cuando se cierra
+            if (clickFueraListener != null) {
+                Toolkit.getDefaultToolkit().removeAWTEventListener(clickFueraListener);
+                clickFueraListener = null;
+            }
         }
     }
     

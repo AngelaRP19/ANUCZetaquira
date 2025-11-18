@@ -6,7 +6,6 @@ co\edu\uptc\view\IngresarCampo.class
 co\edu\uptc\dao\DocumentoDAO.class
 co\edu\uptc\view\DialogoPersonalizado$5.class
 co\edu\uptc\presenter\Main.class
-co\edu\uptc\Main.class
 co\edu\uptc\model\TipoActividad.class
 co\edu\uptc\view\ScrollPersonalizado.class
 co\edu\uptc\view\CrearProyecto.class
